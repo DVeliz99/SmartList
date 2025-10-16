@@ -1,0 +1,57 @@
+name: Versionado automático con Commitizen (Squash-safe)
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Clonar repo
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # necesario para tags
+
+    - name: Configurar Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.9'
+
+    - name: Instalar Commitizen
+      run: |
+        python -m pip install --upgrade pip
+        pip install commitizen
+
+    - name: Debug commit y evento
+      run: |
+        echo "Evento: $GITHUB_EVENT_NAME"
+        echo "Ref: $GITHUB_REF"
+        git log -1 --oneline
+
+    - name: Ejecutar bump y crear tag
+      run: |
+        git config user.name "github-actions"
+        git config user.email "github-actions@github.com"
+
+        # Intentar obtener el siguiente tag
+        NEXT_TAG=$(cz bump --get-next 2>&1) || true
+
+        # Si no hay commits elegibles, crear commit temporal
+        if echo "$NEXT_TAG" | grep -q '\[NO_COMMITS_TO_BUMP\]'; then
+          echo "No commits elegibles para bump. Creando commit temporal..."
+          git commit --allow-empty -m "chore: version bump check"
+          NEXT_TAG=$(cz bump --get-next)
+        fi
+
+        NEXT_TAG="v$NEXT_TAG"
+        git tag -d "$NEXT_TAG" || true
+        cz bump --yes
+
+    - name: Push cambios y tags
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }} HEAD:master --tags
