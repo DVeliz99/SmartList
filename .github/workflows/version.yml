@@ -4,7 +4,11 @@ on:
   push:
     branches:
       - master
-
+  
+permissions:
+  contents: write
+  packages:write
+    
 jobs:
   bump-version:
     runs-on: ubuntu-latest
