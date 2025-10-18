@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:smart_list/data/data_source/product_datasource.dart';
+import 'package:smart_list/data/data_source/product_remote_datasource.dart';
 
 
 import '../../domain/product.dart';
-import '../../core/failure.dart';
-import '../../core/api_config.dart';
+import '../../core/error/failure.dart';
+import '../../core/config/api_config.dart';
 
-class ProductApiDataSource implements ProductDataSource {
+class ProductApiDataSource implements ProductRemoteDataSource {
   //Obtener lista de productos desde la API
   
   @override

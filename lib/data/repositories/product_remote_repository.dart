@@ -1,4 +1,5 @@
 import '../../domain/product.dart';
-abstract class ProductRepository{
+abstract class ProductRemoteRepository{
   Future<List<Product>> fetchProducts();
 }
+

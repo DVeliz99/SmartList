@@ -1,10 +1,12 @@
-import 'package:smart_list/core/failure.dart';
-import 'package:smart_list/core/result.dart';
-import 'package:smart_list/data/repositories/product_repository.dart';
+import 'package:smart_list/core/error/failure.dart';
+import 'package:smart_list/core/error/result.dart';
+import 'package:smart_list/data/repositories/product_local_repository.dart';
+import 'package:smart_list/data/repositories/product_remote_repository.dart';
 import 'package:smart_list/domain/product.dart';
 
+//Caso para obtener productos desde el repositorio remoto
 class FetchProductsUseCase {
-  final ProductRepository repository;
+  final ProductRemoteRepository repository;
 
   FetchProductsUseCase({required this.repository});
 
@@ -18,4 +20,18 @@ class FetchProductsUseCase {
   }
 
   
+}
+//Caso para guardar productos en cache
+class CacheProductsUseCase{
+  final ProductLocalRepository repository;
+  CacheProductsUseCase({required this.repository});
+
+  Future<Result<void>> call(List<Product> products) async{
+    try{
+      await repository.cacheProducts(products);
+      return Result.success(null); // Se retorna null ya que la operación es de tipo void
+    } catch (error){
+      return Result.failure(DatabaseFailure('Error al guardar productos en cache: $error'));
+    }
+  }
 }
