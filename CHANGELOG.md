@@ -1,3 +1,9 @@
+## 0.3.0 (2025-10-18)
+
+### Feat
+
+- **product_use_cases.dart**: Add use case to get data from local db (#8)
+
 ## 0.2.0 (2025-10-18)
 
 ### Feat
