@@ -1,6 +1,6 @@
 import '../../domain/product.dart';
 
-abstract class ProductDataSource {
+abstract class ProductRemoteDataSource {
   Future<List<Product>> fetchProducts();
 
 }
