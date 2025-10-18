@@ -34,4 +34,24 @@ class ProductLocalDatasource implements ProductSqLiteDataSource {
       throw DatabaseFailure('Error al guardar productos en cache: $e');
     }
   }
+
+  /// Obtiene la lista de productos almacenados en la base de datos local
+  @override
+  Future<List<Product>> getCachedProducts() async {
+    final db = await _sqliteConfig.database;
+    try {
+      final List<Map<String, dynamic>> maps = await db.query('products');
+
+      final products = maps.map((map) {
+        return Product(
+          id: map['id'],
+          name: map['name'],
+          data: map['data'] != null ? jsonDecode(map['data']) : null,
+        );
+      }).toList();
+      return products;
+    } catch (error) {
+      throw DatabaseFailure('Error al obtener productos de la cache: $error');
+    }
+  }
 }

@@ -15,23 +15,41 @@ class FetchProductsUseCase {
       final product = await repository.fetchProducts();
       return Result.success(product);
     } catch (error) {
-       return Result.failure(ApiFailure('Error al obtener productos: $error'));
+      return Result.failure(ApiFailure('Error al obtener productos: $error'));
     }
   }
-
-  
 }
+
 //Caso para guardar productos en cache
-class CacheProductsUseCase{
+class CacheProductsUseCase {
   final ProductLocalRepository repository;
   CacheProductsUseCase({required this.repository});
 
-  Future<Result<void>> call(List<Product> products) async{
-    try{
+  Future<Result<void>> call(List<Product> products) async {
+    try {
       await repository.cacheProducts(products);
-      return Result.success(null); // Se retorna null ya que la operación es de tipo void
-    } catch (error){
-      return Result.failure(DatabaseFailure('Error al guardar productos en cache: $error'));
+      return Result.success(
+        null,
+      ); // Se retorna null ya que la operación es de tipo void
+    } catch (error) {
+      return Result.failure(
+        DatabaseFailure('Error al guardar productos en cache: $error'),
+      );
+    }
+  }
+}
+
+class GetCachedProductsUseCase {
+  final ProductLocalRepository repository;
+  GetCachedProductsUseCase({required this.repository});
+
+  Future<Result<List<Product>>> call() async {
+    try {
+      return Result.success(await repository.getCachedProducts());
+    } catch (error) {
+      return Result.failure(
+        DatabaseFailure('Error al obtener productos de la cache: $error'),
+      );
     }
   }
 }

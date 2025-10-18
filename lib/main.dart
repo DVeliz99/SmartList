@@ -32,6 +32,9 @@ void main() async {
   final cacheProductsUseCase = CacheProductsUseCase(
     repository: productLocalRepository,
   );
+  final getCachedProductsUseCase = GetCachedProductsUseCase(
+    repository: productLocalRepository,
+  );
 
   //Instancia del servicio de sincronización
   final syncService = SyncService(
@@ -41,4 +44,16 @@ void main() async {
   );
 
   await syncService.getAndSaveProducts();
+
+  //Obtener datos de la base de datos local
+  final cachedProducts = await getCachedProductsUseCase();
+  if (cachedProducts.isSuccess && cachedProducts.data != null) {
+    for (final product in cachedProducts.data!) {
+      print(product);
+    }
+  } else {
+    print(
+      'Error al obtener productos en cache: ${cachedProducts.failure?.message}',
+    );
+  }
 }
