@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smart_list/domain/product.dart';
 import 'package:smart_list/core/error/result.dart';
-import 'package:smart_list/presentation/widgets/app_bar.dart';
 import 'package:smart_list/presentation/widgets/form.dart';
 import 'package:smart_list/presentation/widgets/product_card.dart';
 import 'package:smart_list/use_cases/product_use_cases.dart';
@@ -15,7 +14,7 @@ class ProductsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomShoppingAppBar(),
+      
       body: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
