@@ -1,6 +1,8 @@
 // Flutter & Dart packages
 import 'package:flutter/material.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:smart_list/core/error/result.dart';
+import 'package:smart_list/presentation/screens/products_page.dart';
 import 'package:smart_list/presentation/widgets/app_bar.dart';
 import 'package:smart_list/presentation/widgets/form.dart';
 
@@ -18,12 +20,6 @@ import 'data/implements/product_remote_repository_implement.dart';
 
 // Use cases
 import 'use_cases/product_use_cases.dart';
-
-// Domain models
-import 'domain/product.dart';
-
-// Presentation / Widgets
-import 'presentation/widgets/product_card.dart';
 
 //fonts
 import 'package:google_fonts/google_fonts.dart';
@@ -64,23 +60,13 @@ void main() async {
 
   await syncService.getAndSaveProducts();
 
-  //Obtener datos de la base de datos local
-  final cachedProducts = await getCachedProductsUseCase();
-  if (cachedProducts.isSuccess && cachedProducts.data != null) {
-    for (final product in cachedProducts.data!) {
-      print(product);
-    }
-  } else {
-    print(
-      'Error al obtener productos en cache: ${cachedProducts.failure?.message}',
-    );
-  }
-
-  runApp(const MyApp());
+  runApp(MyApp(getCachedProductsUseCase: getCachedProductsUseCase));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final GetCachedProductsUseCase getCachedProductsUseCase;
+
+  const MyApp({super.key, required this.getCachedProductsUseCase});
 
   @override
   Widget build(BuildContext context) {
@@ -91,41 +77,7 @@ class MyApp extends StatelessWidget {
       ),
       home: Scaffold(
         appBar: CustomShoppingAppBar(),
-        body: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            children: [
-              ProductForm(
-                product: Product(
-                  id: '0',
-                  name: 'Producto de prueba',
-                  data: {'price': 0.0},
-                ),
-                onSave: () {},
-                actionLabel: 'Agregar',
-              ),
-              ProductCard(
-                product: Product(
-                  id: '0',
-                  name: 'Producto de prueba',
-                  data: {'price': 0.0},
-                ),
-                onEdit: () {},
-                onDelete: () {},
-              ),
-              const SizedBox(height: 12),
-              ProductCard(
-                product: Product(
-                  id: '1',
-                  name: 'Otro Producto',
-                  data: {'price': 10.0},
-                ),
-                onEdit: () {},
-                onDelete: () {},
-              ),
-            ],
-          ),
-        ),
+        body: ProductsPage(getCachedProductsUseCase: getCachedProductsUseCase),
       ),
     );
   }

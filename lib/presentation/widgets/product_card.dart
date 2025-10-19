@@ -15,6 +15,9 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dynamic priceValue = product.data?['price'] ?? product.data?['Price'];
+    final double price = (priceValue is num ? priceValue.toDouble() : 0.0);
+    final String priceText = price.toStringAsFixed(2);
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -29,7 +32,7 @@ class ProductCard extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              'Precio:  \$${product.data?['price'].toStringAsFixed(2)}',
+              'Precio:  \$$priceText',
               style: const TextStyle(
                 fontSize: 18,
                 color: Colors.grey,
@@ -44,7 +47,9 @@ class ProductCard extends StatelessWidget {
                   onPressed: onEdit,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFFE6E6FA),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(7),
+                    ),
                   ),
                   child: const Text(
                     'Editar',
@@ -52,16 +57,18 @@ class ProductCard extends StatelessWidget {
                       color: Color(0xFF6A5ACD),
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
-                      letterSpacing: 1.0
+                      letterSpacing: 1.0,
                     ),
                   ),
                 ),
-                const SizedBox(width:10),
+                const SizedBox(width: 10),
                 ElevatedButton(
                   onPressed: onDelete,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color.fromARGB(255, 253, 215, 212),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(7),
+                    ),
                   ),
                   child: const Text(
                     'Eliminar',
@@ -69,7 +76,7 @@ class ProductCard extends StatelessWidget {
                       color: Color(0xFFDC143C),
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
-                      letterSpacing: 1.0
+                      letterSpacing: 1.0,
                     ),
                   ),
                 ),
