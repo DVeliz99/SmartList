@@ -1,13 +1,32 @@
-import 'package:connectivity_plus/connectivity_plus.dart';
+// Flutter & Dart packages
 import 'package:flutter/material.dart';
-import 'package:smart_list/core/network/network_info.dart';
-import 'package:smart_list/data/api_datasource/product_api_datasource.dart';
-import 'package:smart_list/data/implements/product_local_repository_implement.dart';
-import 'package:smart_list/data/implements/product_remote_repository_implement.dart';
-import 'package:smart_list/data/sqlLite_datasource/product_local_datasource.dart';
-import 'package:smart_list/use_cases/product_use_cases.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:smart_list/presentation/widgets/app_bar.dart';
+import 'package:smart_list/presentation/widgets/form.dart';
 
+// Core
 import 'core/services/sync_service.dart';
+import 'core/network/network_info.dart';
+
+// Data sources
+import 'data/sqlLite_datasource/product_local_datasource.dart';
+import 'data/api_datasource/product_api_datasource.dart';
+
+// Repository implementations
+import 'data/implements/product_local_repository_implement.dart';
+import 'data/implements/product_remote_repository_implement.dart';
+
+// Use cases
+import 'use_cases/product_use_cases.dart';
+
+// Domain models
+import 'domain/product.dart';
+
+// Presentation / Widgets
+import 'presentation/widgets/product_card.dart';
+
+//fonts
+import 'package:google_fonts/google_fonts.dart';
 
 void main() async {
   // Asegurarse de que los bindings de Flutter estén inicializados
@@ -54,6 +73,60 @@ void main() async {
   } else {
     print(
       'Error al obtener productos en cache: ${cachedProducts.failure?.message}',
+    );
+  }
+
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Demo ProductCard',
+      theme: ThemeData(
+        textTheme: GoogleFonts.robotoTextTheme(Theme.of(context).textTheme),
+      ),
+      home: Scaffold(
+        appBar: CustomShoppingAppBar(),
+        body: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            children: [
+              ProductForm(
+                product: Product(
+                  id: '0',
+                  name: 'Producto de prueba',
+                  data: {'price': 0.0},
+                ),
+                onSave: () {},
+                actionLabel: 'Agregar',
+              ),
+              ProductCard(
+                product: Product(
+                  id: '0',
+                  name: 'Producto de prueba',
+                  data: {'price': 0.0},
+                ),
+                onEdit: () {},
+                onDelete: () {},
+              ),
+              const SizedBox(height: 12),
+              ProductCard(
+                product: Product(
+                  id: '1',
+                  name: 'Otro Producto',
+                  data: {'price': 10.0},
+                ),
+                onEdit: () {},
+                onDelete: () {},
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
