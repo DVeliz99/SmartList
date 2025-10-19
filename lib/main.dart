@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:smart_list/core/error/result.dart';
+import 'package:smart_list/presentation/screens/products_page.dart';
 import 'package:smart_list/presentation/widgets/app_bar.dart';
 import 'package:smart_list/presentation/widgets/form.dart';
 
@@ -65,18 +66,6 @@ void main() async {
 
   await syncService.getAndSaveProducts();
 
-  //Obtener datos de la base de datos local
-  final cachedProducts = await getCachedProductsUseCase();
-  if (cachedProducts.isSuccess && cachedProducts.data != null) {
-    for (final product in cachedProducts.data!) {
-      print(product);
-    }
-  } else {
-    print(
-      'Error al obtener productos en cache: ${cachedProducts.failure?.message}',
-    );
-  }
-
   runApp(MyApp(getCachedProductsUseCase: getCachedProductsUseCase));
 }
 
@@ -92,66 +81,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         textTheme: GoogleFonts.robotoTextTheme(Theme.of(context).textTheme),
       ),
-      home: Scaffold(
-        appBar: CustomShoppingAppBar(),
-        body: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            children: [
-              ProductForm(
-                product: Product(
-                  id: '0',
-                  name: 'Producto de prueba',
-                  data: {'price': 0.0},
-                ),
-                onSave: () {},
-                actionLabel: 'Agregar',
-              ),
-              
-              const SizedBox(height: 12),
-              Expanded(
-                child: FutureBuilder<Result<List<Product>>>(
-                  future: getCachedProductsUseCase.call(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    if (snapshot.hasError) {
-                      return Center(child: Text('Error: ${snapshot.error}'));
-                    }
-                    final result = snapshot.data;
-                    if (result == null ||
-                        result.isFailure ||
-                        result.data == null) {
-                      return Center(
-                        child: Text(
-                          'No hay productos: ${result?.failure?.message ?? ''}',
-                        ),
-                      );
-                    }
-                    final products = result.data!;
-
-                    return ListView.builder(
-                      itemCount: products.length,
-                      itemBuilder: (context, index) {
-                        final product = products[index];
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 6),
-                          child: ProductCard(
-                            product: product,
-                            onEdit: () {},
-                            onDelete: () {},
-                          ),
-                        );
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+      home: ProductsPage(getCachedProductsUseCase: getCachedProductsUseCase),
     );
   }
 }
