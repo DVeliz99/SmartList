@@ -1,6 +1,7 @@
 // Flutter & Dart packages
 import 'package:flutter/material.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:smart_list/core/error/result.dart';
 import 'package:smart_list/presentation/widgets/app_bar.dart';
 import 'package:smart_list/presentation/widgets/form.dart';
 
@@ -76,11 +77,13 @@ void main() async {
     );
   }
 
-  runApp(const MyApp());
+  runApp(MyApp(getCachedProductsUseCase: getCachedProductsUseCase));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final GetCachedProductsUseCase getCachedProductsUseCase;
+
+  const MyApp({super.key, required this.getCachedProductsUseCase});
 
   @override
   Widget build(BuildContext context) {
@@ -104,24 +107,46 @@ class MyApp extends StatelessWidget {
                 onSave: () {},
                 actionLabel: 'Agregar',
               ),
-              ProductCard(
-                product: Product(
-                  id: '0',
-                  name: 'Producto de prueba',
-                  data: {'price': 0.0},
-                ),
-                onEdit: () {},
-                onDelete: () {},
-              ),
+              
               const SizedBox(height: 12),
-              ProductCard(
-                product: Product(
-                  id: '1',
-                  name: 'Otro Producto',
-                  data: {'price': 10.0},
+              Expanded(
+                child: FutureBuilder<Result<List<Product>>>(
+                  future: getCachedProductsUseCase.call(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (snapshot.hasError) {
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    }
+                    final result = snapshot.data;
+                    if (result == null ||
+                        result.isFailure ||
+                        result.data == null) {
+                      return Center(
+                        child: Text(
+                          'No hay productos: ${result?.failure?.message ?? ''}',
+                        ),
+                      );
+                    }
+                    final products = result.data!;
+
+                    return ListView.builder(
+                      itemCount: products.length,
+                      itemBuilder: (context, index) {
+                        final product = products[index];
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 6),
+                          child: ProductCard(
+                            product: product,
+                            onEdit: () {},
+                            onDelete: () {},
+                          ),
+                        );
+                      },
+                    );
+                  },
                 ),
-                onEdit: () {},
-                onDelete: () {},
               ),
             ],
           ),
