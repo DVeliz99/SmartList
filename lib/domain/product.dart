@@ -1,7 +1,7 @@
 class Product {
   final String id;
-  final String name;
-  final Map<String, dynamic>? data;
+  String name;
+  Map<String, dynamic>? data;
   Product({required this.id, required this.name, this.data});
 
   factory Product.fromJson(Map<String, dynamic> json) {
