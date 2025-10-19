@@ -21,12 +21,6 @@ import 'data/implements/product_remote_repository_implement.dart';
 // Use cases
 import 'use_cases/product_use_cases.dart';
 
-// Domain models
-import 'domain/product.dart';
-
-// Presentation / Widgets
-import 'presentation/widgets/product_card.dart';
-
 //fonts
 import 'package:google_fonts/google_fonts.dart';
 
@@ -81,7 +75,10 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         textTheme: GoogleFonts.robotoTextTheme(Theme.of(context).textTheme),
       ),
-      home: ProductsPage(getCachedProductsUseCase: getCachedProductsUseCase),
+      home: Scaffold(
+        appBar: CustomShoppingAppBar(),
+        body: ProductsPage(getCachedProductsUseCase: getCachedProductsUseCase),
+      ),
     );
   }
 }
