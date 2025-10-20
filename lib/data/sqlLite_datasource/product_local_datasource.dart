@@ -54,4 +54,45 @@ class ProductLocalDatasource implements ProductSqLiteDataSource {
       throw DatabaseFailure('Error al obtener productos de la cache: $error');
     }
   }
+
+  @override
+  Future<Product> addProduct(Product product) async {
+    final db = await _sqliteConfig.database;
+
+    try {
+      await db.insert('products', {
+        'id': product.id.toString(),
+        'name': product.name,
+        'data': product.data != null ? jsonEncode(product.data) : null,
+        'is_synced': 0,
+      }, conflictAlgorithm: ConflictAlgorithm.ignore);
+      return product;
+    } catch (e) {
+      throw DatabaseFailure('Error al agregar producto: $e');
+    }
+  }
+
+  @override
+  Future<List<Product>> getUnsyncedProducts() async {
+    final db = await _sqliteConfig.database;
+
+    try {
+      final List<Map<String, dynamic>> maps = await db.query(
+        'products',
+        where: 'is_synced = ?',
+        whereArgs: [0],
+      );
+
+      final products = maps.map((map) {
+        return Product(
+          id: map['id'],
+          name: map['name'],
+          data: map['data'] != null ? jsonDecode(map['data']) : null,
+        );
+      }).toList();
+      return products;
+    } catch (e) {
+      throw DatabaseFailure('Error al obtener productos no sincronizados: $e');
+    }
+  }
 }

@@ -53,3 +53,20 @@ class GetCachedProductsUseCase {
     }
   }
 }
+
+class AddProductUseCase{
+  final ProductLocalRepository repository;
+
+  AddProductUseCase({required this.repository});
+
+  Future <Result<Product>> call(Product product) async{
+    try{
+      final addedProduct = await repository.addProduct(product);
+      return Result.success(addedProduct);
+    } catch (error){
+      return Result.failure(
+        DatabaseFailure('Error al agregar producto: $error'),
+      );
+    }
+  }
+}

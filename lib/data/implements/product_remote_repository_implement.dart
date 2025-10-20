@@ -11,6 +11,11 @@ class ProductRepositoryImpl implements ProductRemoteRepository{
     return await dataSource.fetchProducts();
   }
 
+  @override
+  Future<List<Product>>saveProducts(List<Product> products) async{
+    return await dataSource.saveProducts(products);
+  }
+
 }
 
 

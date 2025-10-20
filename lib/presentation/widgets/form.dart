@@ -3,7 +3,7 @@ import 'package:smart_list/domain/product.dart';
 
 class ProductForm extends StatefulWidget {
   final Product product;
-  final VoidCallback onSave;
+  final Future<void> Function(Product) onSave;
   final String actionLabel;
   const ProductForm({
     super.key,
@@ -20,17 +20,31 @@ class _ProductFormState extends State<ProductForm> {
   // Controlador para el campo de texto del producto
   late final TextEditingController _productController;
   late double _price = 0.00;
+  late final TextEditingController _priceController;
+  final FocusNode _priceFocusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
     _productController = TextEditingController(text: widget.product.name);
     _price = (widget.product.data?['price'] as num?)?.toDouble() ?? 0.00;
+    _priceController = TextEditingController(
+      text: _price == 0.00 ? '' : _price.toStringAsFixed(2),
+    );
+
+    // Cuando el usuario deja el campo, formateamos el valor
+    _priceFocusNode.addListener(() {
+      if (!_priceFocusNode.hasFocus) {
+        _priceController.text = _price.toStringAsFixed(2);
+      }
+    });
   }
 
   @override
   void dispose() {
     _productController.dispose();
+    _priceController.dispose();
+    _priceFocusNode.dispose();
     super.dispose();
   }
 
@@ -62,19 +76,6 @@ class _ProductFormState extends State<ProductForm> {
   }
 
   Widget _quantityField() {
-    //maneja datos int y double
-    final String formattedValue = _price == 0.00
-        ? 'Precio'
-        : ' ${_price.toStringAsFixed(2)}';
-
-    final controller = TextEditingController(
-      text: _price == 00.00 ? '' : _price.toStringAsFixed(2),
-    );
-
-    controller.selection = TextSelection.fromPosition(
-      TextPosition(offset: controller.text.length),
-    );
-
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -85,14 +86,15 @@ class _ProductFormState extends State<ProductForm> {
         children: <Widget>[
           Expanded(
             child: TextField(
-              controller: controller,
+              controller: _priceController,
+              focusNode: _priceFocusNode,
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
-              decoration: InputDecoration(
-                hintText: formattedValue == 'Precio' ? 'Precio' : null,
+              decoration: const InputDecoration(
+                hintText: 'Precio',
                 border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(
+                contentPadding: EdgeInsets.symmetric(
                   horizontal: 10.0,
                   vertical: 15.0,
                 ),
@@ -105,7 +107,9 @@ class _ProductFormState extends State<ProductForm> {
               onChanged: (value) {
                 final parsed =
                     double.tryParse(value.replaceAll(',', '.')) ?? 0.0;
-                setState(() => _price = parsed);
+                setState(() {
+                  _price = parsed;
+                });
               },
             ),
           ),
@@ -116,6 +120,7 @@ class _ProductFormState extends State<ProductForm> {
                 onTap: () {
                   setState(() {
                     _price += 1.00;
+                    _priceController.text = _price.toStringAsFixed(2);
                   });
                 },
                 child: const Padding(
@@ -130,8 +135,8 @@ class _ProductFormState extends State<ProductForm> {
               InkWell(
                 onTap: () {
                   setState(() {
-                    // Asegura que el precio nunca sea negativo
                     if (_price >= 1.00) _price -= 1.00;
+                    _priceController.text = _price.toStringAsFixed(2);
                   });
                 },
                 child: const Padding(
@@ -196,7 +201,7 @@ class _ProductFormState extends State<ProductForm> {
             );
 
             // Ejecutar el callback
-            widget.onSave();
+            widget.onSave(widget.product);
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: buttonColor,
