@@ -62,9 +62,18 @@ class _ProductFormState extends State<ProductForm> {
   }
 
   Widget _quantityField() {
+    //maneja datos int y double
     final String formattedValue = _price == 0.00
         ? 'Precio'
         : ' ${_price.toStringAsFixed(2)}';
+
+    final controller = TextEditingController(
+      text: _price == 00.00 ? '' : _price.toStringAsFixed(2),
+    );
+
+    controller.selection = TextSelection.fromPosition(
+      TextPosition(offset: controller.text.length),
+    );
 
     return Container(
       decoration: BoxDecoration(
@@ -75,16 +84,29 @@ class _ProductFormState extends State<ProductForm> {
       child: Row(
         children: <Widget>[
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(left: 10.0),
-              child: Text(
-                formattedValue,
-                style: TextStyle(
-                  fontSize: 18.0,
-                  color: _price == 0.00 ? Colors.grey[500] : Colors.black,
-                  letterSpacing: 0.5,
+            child: TextField(
+              controller: controller,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              decoration: InputDecoration(
+                hintText: formattedValue == 'Precio' ? 'Precio' : null,
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 10.0,
+                  vertical: 15.0,
                 ),
               ),
+              style: TextStyle(
+                fontSize: 18.0,
+                color: _price == 0.00 ? Colors.grey[500] : Colors.black,
+                letterSpacing: 0.5,
+              ),
+              onChanged: (value) {
+                final parsed =
+                    double.tryParse(value.replaceAll(',', '.')) ?? 0.0;
+                setState(() => _price = parsed);
+              },
             ),
           ),
           Column(
