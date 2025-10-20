@@ -15,4 +15,14 @@ class ProductLocalRepositoryImpl implements ProductLocalRepository {
   Future<List<Product>> getCachedProducts() async {
     return await dataSource.getCachedProducts();
   }
+
+  @override
+  Future<Product> addProduct(Product product) async {
+    return await dataSource.addProduct(product);
+  }
+
+  @override  
+  Future<List<Product>> getUnsyncedProducts() async {
+    return await dataSource.getUnsyncedProducts();
+  }
 }

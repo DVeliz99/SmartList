@@ -1,10 +1,7 @@
 // Flutter & Dart packages
 import 'package:flutter/material.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:smart_list/core/error/result.dart';
 import 'package:smart_list/presentation/screens/products_page.dart';
-import 'package:smart_list/presentation/widgets/app_bar.dart';
-import 'package:smart_list/presentation/widgets/form.dart';
 
 // Core
 import 'core/services/sync_service.dart';
@@ -50,6 +47,9 @@ void main() async {
   final getCachedProductsUseCase = GetCachedProductsUseCase(
     repository: productLocalRepository,
   );
+  final addProductUseCase = AddProductUseCase(
+    repository: productLocalRepository,
+  );
 
   //Instancia del servicio de sincronización
   final syncService = SyncService(
@@ -58,15 +58,35 @@ void main() async {
     fetchProductsUseCase: fetchProductsUseCase,
   );
 
+  assert(
+    addProductUseCase != null,
+    'addProductUseCase no se inicializó correctamente',
+  );
+  assert(
+    getCachedProductsUseCase != null,
+    'getCachedProductsUseCase no se inicializó correctamente',
+  );
+
+
   await syncService.getAndSaveProducts();
 
-  runApp(MyApp(getCachedProductsUseCase: getCachedProductsUseCase));
+  runApp(
+    MyApp(
+      getCachedProductsUseCase: getCachedProductsUseCase,
+      addProductUseCase: addProductUseCase,
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
   final GetCachedProductsUseCase getCachedProductsUseCase;
+  final AddProductUseCase addProductUseCase;
 
-  const MyApp({super.key, required this.getCachedProductsUseCase});
+  const MyApp({
+    super.key,
+    required this.getCachedProductsUseCase,
+    required this.addProductUseCase,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -76,8 +96,11 @@ class MyApp extends StatelessWidget {
         textTheme: GoogleFonts.robotoTextTheme(Theme.of(context).textTheme),
       ),
       home: Scaffold(
-        appBar: CustomShoppingAppBar(),
-        body: ProductsPage(getCachedProductsUseCase: getCachedProductsUseCase),
+       
+        body: ProductsPage(
+          getCachedProductsUseCase: getCachedProductsUseCase,
+          addProductUseCase: addProductUseCase,
+        ),
       ),
     );
   }

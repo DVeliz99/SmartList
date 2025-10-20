@@ -1,4 +1,5 @@
 import 'package:smart_list/core/network/network_info.dart';
+import 'package:smart_list/domain/product.dart';
 import 'package:smart_list/use_cases/product_use_cases.dart';
 
 
@@ -49,4 +50,23 @@ class SyncService {
       print('Error en getAndSaveProducts: $error');
     }
   }
+
+  Future<List<Product>> sendProductsToApi(List<Product> products) async {
+    try {
+      final result = await fetchProductsUseCase();
+      if (result.isSuccess && result.data != null) {
+        return result.data!;
+      } else {
+        print(
+          'Error al enviar productos a la API: ${result.failure?.message}',
+        );
+        return [];
+      }
+    } catch (error) {
+      print('Error en sendProductsToApi: $error');
+      return [];
+    }
+  }
+
+  
 }
