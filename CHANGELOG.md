@@ -1,3 +1,9 @@
+## 0.5.0 (2025-10-20)
+
+### Feat
+
+- **products_page.dart**: Add product to sqLite and to remote (#12)
+
 ## 0.4.2 (2025-10-20)
 
 ### Fix
