@@ -12,6 +12,7 @@ class ProductsPage extends StatefulWidget {
   final CheckProductExistsUseCase checkProductExistsUseCase;
   final SoftDeleteLocalProductUseCase softDeleteLocalProductUseCase;
   final DeleteRemoteProductUseCase deleteRemoteProductUseCase;
+  final UpdateLocalProductUseCase updateLocalProductUseCase;
 
   const ProductsPage({
     super.key,
@@ -20,6 +21,7 @@ class ProductsPage extends StatefulWidget {
     required this.checkProductExistsUseCase,
     required this.softDeleteLocalProductUseCase,
     required this.deleteRemoteProductUseCase,
+    required this.updateLocalProductUseCase,
   });
 
   @override
@@ -29,6 +31,7 @@ class ProductsPage extends StatefulWidget {
 class _ProductsPageState extends State<ProductsPage> {
   late Future<Result<List<Product>>> _futureProducts;
   List<Product> _products = [];
+  Product? _editingProduct;
 
   @override
   void initState() {
@@ -38,6 +41,19 @@ class _ProductsPageState extends State<ProductsPage> {
 
   void _loadProducts() {
     _futureProducts = widget.getCachedProductsUseCase.call();
+    // When the future completes, update the local _products list from the result.
+    _futureProducts.then((result) {
+      if (!mounted) return;
+      setState(() {
+        if (result.isSuccess && result.data != null) {
+          _products = result.data!;
+        } else {
+          _products = [];
+        }
+      });
+    }).catchError((_) {
+      
+    });
   }
 
   Future<void> _addProduct(Product product) async {
@@ -85,6 +101,30 @@ class _ProductsPageState extends State<ProductsPage> {
     }
   }
 
+  Future<void> _updateProduct(Product product) async {
+    try {
+      final result = await widget.updateLocalProductUseCase.call(product);
+      if (result.isSuccess && result.data != null) {
+        setState(() {
+          final index = _products.indexWhere((p) => p.id == product.id);
+          if (index != -1) _products[index] = result.data!;
+          _editingProduct = null; // reset para modo agregar
+        });
+      } else {
+        print('Error al actualizar producto: ${result.failure?.message ?? ''}');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Error al actualizar producto',
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -94,16 +134,21 @@ class _ProductsPageState extends State<ProductsPage> {
         child: Column(
           children: [
             ProductForm(
-              product: Product(
-                id: DateTime.now().millisecondsSinceEpoch.toString(),
-                name: '',
-                data: {'price': 0.0},
-              ),
-              onSave: (newProduct) async {
-                await _addProduct(newProduct);
-              },
-              actionLabel: 'Agregar Producto',
+              product:
+                  _editingProduct ??
+                  Product(
+                    id: DateTime.now().millisecondsSinceEpoch.toString(),
+                    name: '',
+                    data: {'price': 0.0},
+                  ),
+              onSave: _addProduct,
+              onUpdate: _updateProduct,
+              actionLabel: _editingProduct != null
+                  ? 'Guardar cambios'
+                  : 'Agregar Producto',
+              isEditing: _editingProduct != null,
             ),
+
             const SizedBox(height: 12),
             Expanded(
               child: FutureBuilder<Result<List<Product>>>(
@@ -129,10 +174,7 @@ class _ProductsPageState extends State<ProductsPage> {
                     );
                   }
 
-                  // Inicializar lista con datos locales si está vacía
-                  if (_products.isEmpty) {
-                    _products = result.data!;
-                  }
+                  if (_products.isEmpty) _products = result.data!;
 
                   return ListView.builder(
                     itemCount: _products.length,
@@ -142,7 +184,13 @@ class _ProductsPageState extends State<ProductsPage> {
                         padding: const EdgeInsets.symmetric(vertical: 6),
                         child: ProductCard(
                           product: product,
-                          onEdit: () {},
+                          // Al hacer click en editar, se pasa al formulario
+                          onEdit: () {
+                            setState(() {
+                              _editingProduct = product;
+                            });
+                            print('Objeto a editar $_editingProduct');
+                          },
                           onDelete: () => _deleteLocalProduct(product.id),
                         ),
                       );

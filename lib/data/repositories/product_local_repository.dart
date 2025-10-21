@@ -10,6 +10,7 @@ abstract class ProductLocalRepository{
   Future<Product> softDeleteProduct(String id);
   Future<List<Product>> getSoftDeletedProducts();
   Future<Product> deleteProduct(Product product);
+  Future<Product> updateProduct(Product product);
   
 }
 

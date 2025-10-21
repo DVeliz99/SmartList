@@ -11,6 +11,8 @@ class SyncService {
   final GetSoftDeletedProductsUseCase getSoftDeletedProductsUseCase;
   final DeleteRemoteProductUseCase deleteRemoteProductUseCase;
   final DeleteLocalProductUseCase deleteLocalProductUseCase;
+  final RemoteProductExistsUseCase remoteProductExistsUseCase;
+  final UpdateRemoteProductUseCase updateRemoteProductUseCase;
 
   SyncService({
     required this.networkInfo,
@@ -21,20 +23,13 @@ class SyncService {
     required this.deleteLocalProductUseCase,
     required this.getUnsyncedProductsUseCase,
     required this.saveProductUseCase,
+    required this.remoteProductExistsUseCase,
+    required this.updateRemoteProductUseCase,
   });
 
   Future<void> getAndSaveProducts() async {
     try {
-      //verificar conexión
-
-      final isConnected = await networkInfo.isConnected;
-
-      if (!isConnected) {
-        print(
-          'No hay conexión a Internet. Solo se puede trabajar con cache local.',
-        );
-        return;
-      }
+    
 
       //obtener productos del remoto
       final result = await fetchProductsUseCase();
@@ -61,28 +56,46 @@ class SyncService {
   }
 
   Future<List<Product>> sendProductsToApi() async {
-    List<Product> savedProducts = [];
+    List<Product> processedProducts = [];
+
     try {
       final result = await getUnsyncedProductsUseCase();
+
       if (result.isSuccess && result.data != null) {
         final unsyncedProducts = result.data!;
         if (unsyncedProducts.isNotEmpty) {
-          for (var p in unsyncedProducts) {
-            dynamic resultSaveProducts = await saveProductUseCase(p);
-            if (resultSaveProducts.isSuccess) {
-              savedProducts.add(resultSaveProducts);
+          for (var product in unsyncedProducts) {
+            try {
+              // Verificar si existe en remoto
+              final existsResult = await remoteProductExistsUseCase(product);
+              if (existsResult.isSuccess && existsResult.data == true) {
+                // Actualizar producto remoto
+                final updateResult = await updateRemoteProductUseCase(product);
+                if (updateResult.isSuccess && updateResult.data != null) {
+                  processedProducts.add(updateResult.data!);
+                }
+              } else {
+                // Guardar como nuevo producto remoto
+                final saveResult = await saveProductUseCase(product);
+                if (saveResult.isSuccess && saveResult.data != null) {
+                  processedProducts.add(saveResult.data!);
+                }
+              }
+            } catch (e) {
+              print('Error procesando el producto ${product.id}: $e');
             }
           }
         }
-        return savedProducts;
       } else {
-        print('Error al enviar productos a la API: ${result.failure?.message}');
-        return [];
+        print(
+          'Error al obtener productos no sincronizados: ${result.failure?.message}',
+        );
       }
     } catch (error) {
       print('Error en sendProductsToApi: $error');
-      return [];
     }
+
+    return processedProducts;
   }
 
   Future<List<Product>> deleteProductsFromApi() async {
@@ -103,7 +116,7 @@ class SyncService {
 
         return softDeletedProducts;
       } else {
-        print('No se pudieron obtener los productos eliminados desde local');
+        print('No se pudieron obtener los productos eliminados desde API');
         return [];
       }
     } catch (e) {

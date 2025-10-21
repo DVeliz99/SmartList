@@ -20,4 +20,14 @@ class ProductRepositoryImpl implements ProductRemoteRepository {
   Future<Product> deleteProduct(String id) async {
     return await dataSource.deleteProduct(id);
   }
+
+  @override
+  Future<Product> productExists(Product product) async {
+    return await dataSource.productExists(product);
+  }
+
+  @override
+  Future<Product> updateProduct(Product product) async {
+    return await dataSource.updateProduct(product);
+  }
 }

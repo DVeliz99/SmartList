@@ -1,4 +1,3 @@
-
 import 'package:smart_list/domain/product.dart';
 
 abstract class ProductSqLiteDataSource {
@@ -10,4 +9,5 @@ abstract class ProductSqLiteDataSource {
   Future<Product> softDeleteProduct(String id);
   Future<List<Product>> getSoftDeletedProducts();
   Future<Product> deleteProduct(Product product);
+  Future<Product> updateProduct(Product product);
 }

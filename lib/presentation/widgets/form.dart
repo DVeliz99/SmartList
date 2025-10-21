@@ -4,12 +4,16 @@ import 'package:smart_list/domain/product.dart';
 class ProductForm extends StatefulWidget {
   final Product product;
   final Future<void> Function(Product) onSave;
+  final Future<void> Function(Product)? onUpdate;
   final String actionLabel;
+  final bool isEditing;
   const ProductForm({
     super.key,
     required this.product,
     required this.onSave,
+    required this.onUpdate,
     required this.actionLabel,
+    this.isEditing = false,
   });
 
   @override
@@ -29,7 +33,7 @@ class _ProductFormState extends State<ProductForm> {
     _productController = TextEditingController(text: widget.product.name);
     _price = (widget.product.data?['price'] as num?)?.toDouble() ?? 0.00;
     _priceController = TextEditingController(
-      text: _price == 0.00 ? '' : _price.toStringAsFixed(2),
+      text: widget.product.name.isEmpty ? '' : _price.toStringAsFixed(2),
     );
 
     // Cuando el usuario deja el campo, formateamos el valor
@@ -38,6 +42,22 @@ class _ProductFormState extends State<ProductForm> {
         _priceController.text = _price.toStringAsFixed(2);
       }
     });
+
+    // print('El producto es: $_productController');
+  }
+
+  @override
+  void didUpdateWidget(covariant ProductForm oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Si el producto cambió, actualizar los controllers
+    if (oldWidget.product.id != widget.product.id) {
+      _productController.text = widget.product.name;
+      _price = (widget.product.data?['price'] as num?)?.toDouble() ?? 0.0;
+      _priceController.text = widget.product.name.isEmpty
+          ? ''
+          : _price.toStringAsFixed(2);
+    }
   }
 
   @override
@@ -92,7 +112,7 @@ class _ProductFormState extends State<ProductForm> {
                 decimal: true,
               ),
               decoration: const InputDecoration(
-                hintText: 'Precio',
+                hintText: 'Precio', // placeholder
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.symmetric(
                   horizontal: 10.0,
@@ -101,7 +121,9 @@ class _ProductFormState extends State<ProductForm> {
               ),
               style: TextStyle(
                 fontSize: 18.0,
-                color: _price == 0.00 ? Colors.grey[500] : Colors.black,
+                color: _priceController.text.isEmpty
+                    ? Colors.grey[500]
+                    : Colors.black,
                 letterSpacing: 0.5,
               ),
               onChanged: (value) {
@@ -155,6 +177,8 @@ class _ProductFormState extends State<ProductForm> {
     );
   }
 
+  
+
   @override
   Widget build(BuildContext context) {
     final Color buttonColor = const Color(0xFF6A5ACD);
@@ -180,47 +204,36 @@ class _ProductFormState extends State<ProductForm> {
 
         // Botón principal
         ElevatedButton(
-          onPressed: () {
-            // Actualizar el objeto Product con los valores del estado local (MUTACIÓN)
+          onPressed: () async {
+            // Actualizar valores del producto desde los TextFields
             widget.product.name = _productController.text;
-
-            // Asegurar que el mapa 'data' no es nulo antes de actualizar 'price'
-            if (widget.product.data == null) {
-              widget.product.data = {};
-            }
+            widget.product.data ??= {};
             widget.product.data!['price'] = _price;
 
-            // Mostrar SnackBar con la acción y datos actuales
+            // Ejecutar la acción correcta
+            if (widget.isEditing && widget.onUpdate != null) {
+              await widget.onUpdate!(widget.product);
+            } else {
+              await widget.onSave(widget.product);
+            }
+
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Center(
-                  child: Text('Inserción exitosa', textAlign: TextAlign.center),
+              const SnackBar(
+                content: Center(
+                  child: Text(
+                    'Acción realizada con éxito',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
                 behavior: SnackBarBehavior.floating,
               ),
             );
-
-            print(
-              '${widget.actionLabel} producto: "${widget.product.name}" (ID: ${widget.product.id})',
-            );
-
-            // Ejecutar el callback
-            widget.onSave(widget.product);
           },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: buttonColor,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 15.0),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-
-            elevation: 2,
-          ),
+          style: ElevatedButton.styleFrom(backgroundColor: buttonColor),
           child: Text(
             widget.actionLabel,
-
-            style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+            style: TextStyle(color: Colors.white),
           ),
         ),
       ],
