@@ -47,4 +47,9 @@ class ProductLocalRepositoryImpl implements ProductLocalRepository {
   Future<Product> deleteProduct(Product product) async {
     return await dataSource.deleteProduct(product);
   }
+
+  @override
+  Future<Product> updateProduct(Product product) async {
+    return await dataSource.updateProduct(product);
+  }
 }

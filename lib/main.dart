@@ -25,12 +25,11 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 void main() async {
-  // Asegurarse de que los bindings de Flutter estén inicializados
   WidgetsFlutterBinding.ensureInitialized();
 
   final networkInfo = NetworkInfoImpl(Connectivity());
 
-  // Instancia del repositorio remoto y caso de uso
+  // --- Inicializar repositorios, usecases y SyncService ---
   final remoteProductDataSource = ProductApiDataSource();
   final productRemoteRepository = ProductRepositoryImpl(
     dataSource: remoteProductDataSource,
@@ -39,7 +38,6 @@ void main() async {
     repository: productRemoteRepository,
   );
 
-  // Instancia del repositorio local y caso de uso
   final localProductDataSource = ProductLocalDatasource();
   final productLocalRepository = ProductLocalRepositoryImpl(
     dataSource: localProductDataSource,
@@ -53,33 +51,37 @@ void main() async {
   final addProductUseCase = AddProductUseCase(
     repository: productLocalRepository,
   );
-
   final checkProductExistsUseCase = CheckProductExistsUseCase(
     repository: productLocalRepository,
   );
   final deleteLocalProductUseCase = DeleteLocalProductUseCase(
     repository: productLocalRepository,
   );
-
   final deleteRemoteProductUseCase = DeleteRemoteProductUseCase(
     repository: productRemoteRepository,
   );
-
   final getSoftDeletedProductsUseCase = GetSoftDeletedProductsUseCase(
     repository: productLocalRepository,
   );
-
   final softDeleteLocalProductUseCase = SoftDeleteLocalProductUseCase(
     repository: productLocalRepository,
   );
   final saveRemoteProductUseCase = SaveProductUseCase(
     repository: productRemoteRepository,
   );
-
   final getUnsyncedProductsUseCase = GetUnsyncedProductsUseCase(
     repository: productLocalRepository,
   );
-  //Instancia del servicio de sincronización
+  final updateLocalProductUseCase = UpdateLocalProductUseCase(
+    repository: productLocalRepository,
+  );
+  final remoteProductExistsUseCase = RemoteProductExistsUseCase(
+    repository: productRemoteRepository,
+  );
+  final updateRemoteProductUseCase = UpdateRemoteProductUseCase(
+    repository: productRemoteRepository,
+  );
+
   final syncService = SyncService(
     networkInfo: networkInfo,
     cacheProductsUseCase: cacheProductsUseCase,
@@ -89,12 +91,12 @@ void main() async {
     deleteLocalProductUseCase: deleteLocalProductUseCase,
     saveProductUseCase: saveRemoteProductUseCase,
     getUnsyncedProductsUseCase: getUnsyncedProductsUseCase,
+    remoteProductExistsUseCase: remoteProductExistsUseCase,
+    updateRemoteProductUseCase: updateRemoteProductUseCase,
   );
 
-  await syncService.getAndSaveProducts();
-  await syncService.sendProductsToApi();
-  await syncService.deleteProductsFromApi();
-  await syncService.deleteProductsFromLocal();
+  // --- Ejecutar sincronización ---
+  await performSync(syncService, networkInfo);
 
   runApp(
     MyApp(
@@ -103,8 +105,27 @@ void main() async {
       checkProductExistsUseCase: checkProductExistsUseCase,
       softDeleteLocalProductUseCase: softDeleteLocalProductUseCase,
       deleteRemoteProductUseCase: deleteRemoteProductUseCase,
+      updateLocalProductUseCase: updateLocalProductUseCase,
     ),
   );
+}
+
+Future<void> performSync(
+  SyncService syncService,
+  NetworkInfo networkInfo,
+) async {
+  if (await networkInfo.isConnected) {
+    print('Sincronizando productos con la API...');
+    await syncService.getAndSaveProducts();
+    await syncService.sendProductsToApi();
+    await syncService.deleteProductsFromApi();
+  } else {
+    print('No hay conexión a internet. Operaciones remotas omitidas.');
+  }
+
+  // Esto se hace siempre, no necesita internet
+  await syncService.deleteProductsFromLocal();
+
 }
 
 void deleteDatabaseIfExists() async {
@@ -120,6 +141,7 @@ class MyApp extends StatelessWidget {
   final CheckProductExistsUseCase checkProductExistsUseCase;
   final SoftDeleteLocalProductUseCase softDeleteLocalProductUseCase;
   final DeleteRemoteProductUseCase deleteRemoteProductUseCase;
+  final UpdateLocalProductUseCase updateLocalProductUseCase;
 
   const MyApp({
     super.key,
@@ -128,6 +150,7 @@ class MyApp extends StatelessWidget {
     required this.checkProductExistsUseCase,
     required this.softDeleteLocalProductUseCase,
     required this.deleteRemoteProductUseCase,
+    required this.updateLocalProductUseCase,
   });
 
   @override
@@ -144,6 +167,7 @@ class MyApp extends StatelessWidget {
           checkProductExistsUseCase: checkProductExistsUseCase,
           softDeleteLocalProductUseCase: softDeleteLocalProductUseCase,
           deleteRemoteProductUseCase: deleteRemoteProductUseCase,
+          updateLocalProductUseCase: updateLocalProductUseCase,
         ),
       ),
     );

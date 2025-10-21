@@ -190,7 +190,7 @@ class ProductLocalDatasource implements ProductSqLiteDataSource {
     final db = await _sqliteConfig.database;
 
     try {
-      // Usamos batch para eliminar todos los productos en una sola transacción
+      // Usamos batch para eliminar
       final batch = db.batch();
 
       batch.delete('products', where: 'id = ?', whereArgs: [product.id]);
@@ -200,6 +200,45 @@ class ProductLocalDatasource implements ProductSqLiteDataSource {
       return product;
     } catch (e) {
       throw DatabaseFailure('Error al eliminar productos: $e');
+    }
+  }
+
+  @override
+  Future<Product> updateProduct(Product product) async {
+    final db = await _sqliteConfig.database;
+    try {
+      await db.update(
+        'products',
+        {
+          'name': product.name,
+          'data': jsonEncode(product.data), // se guarda como JSON
+          'is_synced': 0, 
+        },
+        where: 'id = ?',
+        whereArgs: [product.id],
+      );
+
+      final List<Map<String, dynamic>> maps = await db.query(
+        'products',
+        where: 'id = ?',
+        whereArgs: [product.id],
+        limit: 1,
+      );
+
+      if (maps.isNotEmpty) {
+        final updated = maps.first;
+        return Product(
+          id: updated['id'],
+          name: updated['name'],
+          data: updated['data'] != null ? jsonDecode(updated['data']) : null,
+        );
+      } else {
+        throw DatabaseFailure(
+          'Producto no encontrado después de la actualización',
+        );
+      }
+    } catch (e) {
+      throw DatabaseFailure('Error al actualizar producto: $e');
     }
   }
 }

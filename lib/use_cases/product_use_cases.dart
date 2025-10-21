@@ -191,3 +191,49 @@ class GetUnsyncedProductsUseCase {
     }
   }
 }
+
+class UpdateLocalProductUseCase {
+  final ProductLocalRepository repository;
+  UpdateLocalProductUseCase({required this.repository});
+
+  Future<Result<Product>> call(Product product) async {
+    try {
+      final updatedProduct = await repository.updateProduct(product);
+      return Result.success(updatedProduct);
+    } catch (error) {
+      return Result.failure(DatabaseFailure('Error al actualizar el producto'));
+    }
+  }
+}
+
+class RemoteProductExistsUseCase {
+  final ProductRemoteRepository repository;
+  RemoteProductExistsUseCase({required this.repository});
+
+  Future<Result<Product>> call(Product product) async {
+    try {
+      final currentProduct = await repository.productExists(product);
+      return Result.success(currentProduct);
+    } catch (error) {
+      return Result.failure(
+        ApiFailure('Error al ecnontrar el producto en remoto: $error'),
+      );
+    }
+  }
+}
+
+class UpdateRemoteProductUseCase {
+  final ProductRemoteRepository repository;
+  UpdateRemoteProductUseCase({required this.repository});
+
+  Future<Result<Product>> call(Product product) async {
+    try {
+      final currentProduct = await repository.updateProduct(product);
+      return Result.success(currentProduct);
+    } catch (error) {
+      return Result.failure(
+        ApiFailure('Error al ecnontrar el producto en remoto: $error'),
+      );
+    }
+  }
+}
