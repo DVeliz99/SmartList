@@ -1,3 +1,9 @@
+## 0.7.2 (2025-10-21)
+
+### Perf
+
+- **main.dart**: optimize main thread by moving sync to background (#18)
+
 ## 0.7.1 (2025-10-21)
 
 ### Refactor
