@@ -21,6 +21,9 @@ import 'use_cases/product_use_cases.dart';
 //fonts
 import 'package:google_fonts/google_fonts.dart';
 
+import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
+
 void main() async {
   // Asegurarse de que los bindings de Flutter estén inicializados
   WidgetsFlutterBinding.ensureInitialized();
@@ -51,55 +54,96 @@ void main() async {
     repository: productLocalRepository,
   );
 
+  final checkProductExistsUseCase = CheckProductExistsUseCase(
+    repository: productLocalRepository,
+  );
+  final deleteLocalProductUseCase = DeleteLocalProductUseCase(
+    repository: productLocalRepository,
+  );
+
+  final deleteRemoteProductUseCase = DeleteRemoteProductUseCase(
+    repository: productRemoteRepository,
+  );
+
+  final getSoftDeletedProductsUseCase = GetSoftDeletedProductsUseCase(
+    repository: productLocalRepository,
+  );
+
+  final softDeleteLocalProductUseCase = SoftDeleteLocalProductUseCase(
+    repository: productLocalRepository,
+  );
+  final saveRemoteProductUseCase = SaveProductUseCase(
+    repository: productRemoteRepository,
+  );
+
+  final getUnsyncedProductsUseCase = GetUnsyncedProductsUseCase(
+    repository: productLocalRepository,
+  );
   //Instancia del servicio de sincronización
   final syncService = SyncService(
     networkInfo: networkInfo,
     cacheProductsUseCase: cacheProductsUseCase,
     fetchProductsUseCase: fetchProductsUseCase,
+    getSoftDeletedProductsUseCase: getSoftDeletedProductsUseCase,
+    deleteRemoteProductUseCase: deleteRemoteProductUseCase,
+    deleteLocalProductUseCase: deleteLocalProductUseCase,
+    saveProductUseCase: saveRemoteProductUseCase,
+    getUnsyncedProductsUseCase: getUnsyncedProductsUseCase,
   );
-
-  assert(
-    addProductUseCase != null,
-    'addProductUseCase no se inicializó correctamente',
-  );
-  assert(
-    getCachedProductsUseCase != null,
-    'getCachedProductsUseCase no se inicializó correctamente',
-  );
-
 
   await syncService.getAndSaveProducts();
+  await syncService.sendProductsToApi();
+  await syncService.deleteProductsFromApi();
+  await syncService.deleteProductsFromLocal();
 
   runApp(
     MyApp(
       getCachedProductsUseCase: getCachedProductsUseCase,
       addProductUseCase: addProductUseCase,
+      checkProductExistsUseCase: checkProductExistsUseCase,
+      softDeleteLocalProductUseCase: softDeleteLocalProductUseCase,
+      deleteRemoteProductUseCase: deleteRemoteProductUseCase,
     ),
   );
+}
+
+void deleteDatabaseIfExists() async {
+  final path = join(await getDatabasesPath(), 'my_app.db');
+  await deleteDatabase(path);
+
+  //print('base de datos eliminada');
 }
 
 class MyApp extends StatelessWidget {
   final GetCachedProductsUseCase getCachedProductsUseCase;
   final AddProductUseCase addProductUseCase;
+  final CheckProductExistsUseCase checkProductExistsUseCase;
+  final SoftDeleteLocalProductUseCase softDeleteLocalProductUseCase;
+  final DeleteRemoteProductUseCase deleteRemoteProductUseCase;
 
   const MyApp({
     super.key,
     required this.getCachedProductsUseCase,
     required this.addProductUseCase,
+    required this.checkProductExistsUseCase,
+    required this.softDeleteLocalProductUseCase,
+    required this.deleteRemoteProductUseCase,
   });
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Demo ProductCard',
+      title: 'ProductCard',
       theme: ThemeData(
         textTheme: GoogleFonts.robotoTextTheme(Theme.of(context).textTheme),
       ),
       home: Scaffold(
-       
         body: ProductsPage(
           getCachedProductsUseCase: getCachedProductsUseCase,
           addProductUseCase: addProductUseCase,
+          checkProductExistsUseCase: checkProductExistsUseCase,
+          softDeleteLocalProductUseCase: softDeleteLocalProductUseCase,
+          deleteRemoteProductUseCase: deleteRemoteProductUseCase,
         ),
       ),
     );

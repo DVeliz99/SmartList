@@ -2,20 +2,22 @@ import '../repositories/product_remote_repository.dart';
 import '../../domain/product.dart';
 import '../data_source/product_remote_datasource.dart';
 
-class ProductRepositoryImpl implements ProductRemoteRepository{
+class ProductRepositoryImpl implements ProductRemoteRepository {
   final ProductRemoteDataSource dataSource;
   ProductRepositoryImpl({required this.dataSource});
 
   @override
-  Future<List<Product>> fetchProducts() async{
+  Future<List<Product>> fetchProducts() async {
     return await dataSource.fetchProducts();
   }
 
   @override
-  Future<List<Product>>saveProducts(List<Product> products) async{
-    return await dataSource.saveProducts(products);
+  Future<Product> saveProduct(Product product) async {
+    return await dataSource.saveProduct(product);
   }
 
+  @override
+  Future<Product> deleteProduct(String id) async {
+    return await dataSource.deleteProduct(id);
+  }
 }
-
-

@@ -193,11 +193,15 @@ class _ProductFormState extends State<ProductForm> {
             // Mostrar SnackBar con la acción y datos actuales
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(
-                  // para debug
-                  '${widget.actionLabel} producto: "${widget.product.name}" (ID: ${widget.product.id})',
+                content: const Center(
+                  child: Text('Inserción exitosa', textAlign: TextAlign.center),
                 ),
+                behavior: SnackBarBehavior.floating,
               ),
+            );
+
+            print(
+              '${widget.actionLabel} producto: "${widget.product.name}" (ID: ${widget.product.id})',
             );
 
             // Ejecutar el callback

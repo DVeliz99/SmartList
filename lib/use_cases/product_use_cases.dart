@@ -54,18 +54,139 @@ class GetCachedProductsUseCase {
   }
 }
 
-class AddProductUseCase{
+class AddProductUseCase {
   final ProductLocalRepository repository;
 
   AddProductUseCase({required this.repository});
 
-  Future <Result<Product>> call(Product product) async{
-    try{
+  Future<Result<Product>> call(Product product) async {
+    try {
       final addedProduct = await repository.addProduct(product);
       return Result.success(addedProduct);
-    } catch (error){
+    } catch (error) {
       return Result.failure(
         DatabaseFailure('Error al agregar producto: $error'),
+      );
+    }
+  }
+}
+
+class SaveProductUseCase {
+  final ProductRemoteRepository repository;
+
+  SaveProductUseCase({required this.repository});
+
+  Future<Result<Product>> call(Product product) async {
+    try {
+      final addedProduct = await repository.saveProduct(product);
+      return Result.success(addedProduct);
+    } catch (error) {
+      return Result.failure(
+        ApiFailure('Error al agregar producto en remoto: $error'),
+      );
+    }
+  }
+}
+
+class CheckProductExistsUseCase {
+  final ProductLocalRepository repository;
+
+  CheckProductExistsUseCase({required this.repository});
+
+  Future<Result<bool>> call(String id) async {
+    try {
+      final exists = await repository.productExists(id);
+      return Result.success(exists);
+    } catch (error) {
+      return Result.failure(
+        DatabaseFailure('Error al verificar existencia del producto: $error'),
+      );
+    }
+  }
+}
+
+class SoftDeleteLocalProductUseCase {
+  final ProductLocalRepository repository;
+
+  SoftDeleteLocalProductUseCase({required this.repository});
+
+  Future<Result<Product>> call(String id) async {
+    try {
+      final deletedProduct = await repository.softDeleteProduct(id);
+      return Result.success(deletedProduct);
+    } catch (error) {
+      return Result.failure(
+        DatabaseFailure('Error al eliminar producto en local: $error'),
+      );
+    }
+  }
+}
+
+class GetSoftDeletedProductsUseCase {
+  final ProductLocalRepository repository;
+
+  GetSoftDeletedProductsUseCase({required this.repository});
+
+  Future<Result<List<Product>>> call() async {
+    try {
+      final softDeletedProducts = await repository.getSoftDeletedProducts();
+      return Result.success(softDeletedProducts);
+    } catch (error) {
+      return Result.failure(
+        DatabaseFailure('Error al obtener productos eliminados'),
+      );
+    }
+  }
+}
+
+class DeleteRemoteProductUseCase {
+  final ProductRemoteRepository repository;
+
+  DeleteRemoteProductUseCase({required this.repository});
+
+  Future<Result<Product>> call(String id) async {
+    try {
+      final deletedProduct = await repository.deleteProduct(id);
+      return Result.success(deletedProduct);
+    } catch (error) {
+      return Result.failure(
+        ApiFailure('Error al eliminar producto en remoto: $error'),
+      );
+    }
+  }
+}
+
+class DeleteLocalProductUseCase {
+  final ProductLocalRepository repository;
+
+  DeleteLocalProductUseCase({required this.repository});
+
+  Future<Result<Product>> call(Product product) async {
+    try {
+      final deletedProduct = await repository.deleteProduct(product);
+      return Result.success(deletedProduct);
+    } catch (error) {
+      return Result.failure(
+        ApiFailure(
+          'Error al eliminar producto permanentemente en local: $error',
+        ),
+      );
+    }
+  }
+}
+
+class GetUnsyncedProductsUseCase {
+  final ProductLocalRepository repository;
+
+  GetUnsyncedProductsUseCase({required this.repository});
+
+  Future<Result<List<Product>>> call() async {
+    try {
+      final unsyncedProducts = await repository.getUnsyncedProducts();
+      return Result.success(unsyncedProducts);
+    } catch (error) {
+      return Result.failure(
+        DatabaseFailure('Error al obtener productos no sincronizados'),
       );
     }
   }
