@@ -127,6 +127,12 @@ class _ProductFormState extends State<ProductForm> {
                     : Colors.black,
                 letterSpacing: 0.5,
               ),
+              onTap: () {
+                // Solo limpiar al agregar un producto nuevo
+                if (!widget.isEditing && _priceController.text.isNotEmpty) {
+                  _priceController.clear();
+                }
+              },
               onChanged: (value) {
                 final parsed =
                     double.tryParse(value.replaceAll(',', '.')) ?? 0.0;
@@ -178,7 +184,21 @@ class _ProductFormState extends State<ProductForm> {
     );
   }
 
-  
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Center(
+          child: Text(
+            message,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.white),
+          ),
+        ),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.redAccent,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -206,6 +226,20 @@ class _ProductFormState extends State<ProductForm> {
         // Botón principal
         ElevatedButton(
           onPressed: () async {
+            final name = _productController.text.trim();
+            final price = _price;
+
+            //  Validar campos vacíos
+            if (name.isEmpty) {
+              _showSnackBar('Por favor ingresa un nombre para el producto');
+              return;
+            }
+
+            if (price <= 0) {
+              _showSnackBar('Por favor ingresa un precio válido');
+              return;
+            }
+
             // Actualizar valores del producto desde los TextFields
             widget.product.name = _productController.text;
             widget.product.data ??= {};
