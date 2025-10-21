@@ -1,5 +1,6 @@
 import 'package:smart_list/domain/product.dart';
 
+//Recursos locales
 abstract class ProductSqLiteDataSource {
   Future<void> cacheProducts(List<Product> products);
   Future<List<Product>> getCachedProducts();

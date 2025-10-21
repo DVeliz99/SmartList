@@ -1,7 +1,7 @@
-
 import 'package:smart_list/domain/product.dart';
 
-abstract class ProductLocalRepository{
+//Repositorio local
+abstract class ProductLocalRepository {
   Future<void> cacheProducts(List<Product> products);
   Future<List<Product>> getCachedProducts();
   Future<Product> addProduct(Product product);
@@ -11,6 +11,4 @@ abstract class ProductLocalRepository{
   Future<List<Product>> getSoftDeletedProducts();
   Future<Product> deleteProduct(Product product);
   Future<Product> updateProduct(Product product);
-  
 }
-

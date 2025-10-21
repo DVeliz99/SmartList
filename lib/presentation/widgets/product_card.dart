@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../domain/product.dart';
 
+//crd reutilizable
 class ProductCard extends StatelessWidget {
   final Product product;
   final VoidCallback onDelete;

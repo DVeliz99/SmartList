@@ -2,6 +2,7 @@ import '../repositories/product_remote_repository.dart';
 import '../../domain/product.dart';
 import '../data_source/product_remote_datasource.dart';
 
+//Implementación de recursos remotos
 class ProductRepositoryImpl implements ProductRemoteRepository {
   final ProductRemoteDataSource dataSource;
   ProductRepositoryImpl({required this.dataSource});

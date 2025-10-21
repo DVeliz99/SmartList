@@ -1,9 +1,8 @@
-import 'package:smart_list/use_cases/product_use_cases.dart';
-
 import '../repositories/product_local_repository.dart';
 import '../../domain/product.dart';
 import '../data_source/product_local_datasource.dart';
 
+//Implementación de recursos locales
 class ProductLocalRepositoryImpl implements ProductLocalRepository {
   final ProductSqLiteDataSource dataSource;
   ProductLocalRepositoryImpl({required this.dataSource});

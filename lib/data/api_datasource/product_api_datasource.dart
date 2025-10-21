@@ -8,7 +8,6 @@ import '../../core/config/api_config.dart';
 
 class ProductApiDataSource implements ProductRemoteDataSource {
   //Obtener lista de productos desde la API
-
   @override
   Future<List<Product>> fetchProducts() async {
     final response = await http
@@ -17,7 +16,7 @@ class ProductApiDataSource implements ProductRemoteDataSource {
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonList = json.decode(response.body);
-      print('Data Obtenida con éxito desde la API');
+      // print('Data Obtenida con éxito desde la API');
       return jsonList.map((e) => Product.fromJson(e)).toList();
     } else {
       throw ApiFailure(
@@ -26,6 +25,7 @@ class ProductApiDataSource implements ProductRemoteDataSource {
     }
   }
 
+  //Guardar productos en remoto
   @override
   Future<Product> saveProduct(Product product) async {
     final response = await http
@@ -38,7 +38,7 @@ class ProductApiDataSource implements ProductRemoteDataSource {
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       final Map<String, dynamic> data = jsonDecode(response.body);
-      print('Producto guardado con éxito');
+      // print('Producto guardado con éxito');
       return Product.fromJson(data);
     } else {
       throw ApiFailure(
@@ -47,6 +47,7 @@ class ProductApiDataSource implements ProductRemoteDataSource {
     }
   }
 
+  //eliminar productos del remoto
   @override
   Future<Product> deleteProduct(String id) async {
     final uri = Uri.parse('${ApiConfig.baseUrl}/$id');
@@ -59,7 +60,7 @@ class ProductApiDataSource implements ProductRemoteDataSource {
       // Opcional: leer mensaje de la API para debug
       if (response.body.isNotEmpty) {
         final Map<String, dynamic> data = jsonDecode(response.body);
-        print('Mensaje API: ${data['message']}');
+        // print('Mensaje API: ${data['message']}');
       }
 
       print('Producto eliminado con éxito');
@@ -72,6 +73,7 @@ class ProductApiDataSource implements ProductRemoteDataSource {
     }
   }
 
+  // Verifica si el producto existe en el remoto
   @override
   Future<Product> productExists(Product product) async {
     final uri = Uri.parse('${ApiConfig.baseUrl}/${product.id}');
@@ -82,7 +84,7 @@ class ProductApiDataSource implements ProductRemoteDataSource {
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> data = json.decode(response.body);
-      print('El producto existe');
+      // print('El producto existe');
       return Product.fromJson(data);
     } else if (response.statusCode == 404) {
       throw ApiFailure('Producto no encontrado: ${product.id}');
@@ -93,6 +95,7 @@ class ProductApiDataSource implements ProductRemoteDataSource {
     }
   }
 
+  //Actualiza el producto
   @override
   Future<Product> updateProduct(Product product) async {
     final uri = Uri.parse('${ApiConfig.baseUrl}/${product.id}');
@@ -107,7 +110,7 @@ class ProductApiDataSource implements ProductRemoteDataSource {
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> data = json.decode(response.body);
-      print('El producto se actualizco con éxito');
+      // print('El producto se actualizco con éxito');
       return Product.fromJson(data);
     } else if (response.statusCode == 404) {
       throw ApiFailure('Producto no encontrado: ${product.id}');

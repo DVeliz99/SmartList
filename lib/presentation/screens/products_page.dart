@@ -39,23 +39,25 @@ class _ProductsPageState extends State<ProductsPage> {
     _loadProducts();
   }
 
+  //cargar products
   void _loadProducts() {
     _futureProducts = widget.getCachedProductsUseCase.call();
     // When the future completes, update the local _products list from the result.
-    _futureProducts.then((result) {
-      if (!mounted) return;
-      setState(() {
-        if (result.isSuccess && result.data != null) {
-          _products = result.data!;
-        } else {
-          _products = [];
-        }
-      });
-    }).catchError((_) {
-      
-    });
+    _futureProducts
+        .then((result) {
+          if (!mounted) return;
+          setState(() {
+            if (result.isSuccess && result.data != null) {
+              _products = result.data!;
+            } else {
+              _products = [];
+            }
+          });
+        })
+        .catchError((_) {});
   }
 
+//Añadir producto
   Future<void> _addProduct(Product product) async {
     try {
       //guarda el producto en local
@@ -80,6 +82,7 @@ class _ProductsPageState extends State<ProductsPage> {
     }
   }
 
+//eliminar productos locales
   Future<void> _deleteLocalProduct(String id) async {
     try {
       final deleteLocalProduct = await widget.softDeleteLocalProductUseCase
@@ -101,6 +104,7 @@ class _ProductsPageState extends State<ProductsPage> {
     }
   }
 
+//Actualizar producto
   Future<void> _updateProduct(Product product) async {
     try {
       final result = await widget.updateLocalProductUseCase.call(product);

@@ -27,10 +27,9 @@ class SyncService {
     required this.updateRemoteProductUseCase,
   });
 
+  //Obtener productos remotos y añadirlos a local
   Future<void> getAndSaveProducts() async {
     try {
-    
-
       //obtener productos del remoto
       final result = await fetchProductsUseCase();
       if (result.isSuccess && result.data != null) {
@@ -39,22 +38,23 @@ class SyncService {
         //guardar productos en cache
         final cacheResult = await cacheProductsUseCase(products);
         if (cacheResult.isSuccess) {
-          print('Productos guardados en cache correctamente.');
+          // print('Productos guardados en cache correctamente.');
         } else {
-          print(
-            'Error al guardar productos en cache: ${cacheResult.failure?.message}',
-          );
+          // print(
+          //   'Error al guardar productos en cache: ${cacheResult.failure?.message}',
+          // );
         }
       } else {
-        print(
-          'Error al obtener productos desde la API: ${result.failure?.message}',
-        );
+        // print(
+        //   'Error al obtener productos desde la API: ${result.failure?.message}',
+        // );
       }
     } catch (error) {
-      print('Error en getAndSaveProducts: $error');
+      // print('Error en getAndSaveProducts: $error');
     }
   }
 
+  //Enviar los productos no sincronizados al remoto
   Future<List<Product>> sendProductsToApi() async {
     List<Product> processedProducts = [];
 
@@ -82,22 +82,23 @@ class SyncService {
                 }
               }
             } catch (e) {
-              print('Error procesando el producto ${product.id}: $e');
+              // print('Error procesando el producto ${product.id}: $e');
             }
           }
         }
       } else {
-        print(
-          'Error al obtener productos no sincronizados: ${result.failure?.message}',
-        );
+        // print(
+        //   'Error al obtener productos no sincronizados: ${result.failure?.message}',
+        // );
       }
     } catch (error) {
-      print('Error en sendProductsToApi: $error');
+      // print('Error en sendProductsToApi: $error');
     }
 
     return processedProducts;
   }
 
+  // Eliminar productos del remoto
   Future<List<Product>> deleteProductsFromApi() async {
     try {
       final result = await getSoftDeletedProductsUseCase();
@@ -108,23 +109,24 @@ class SyncService {
             p.id,
           );
           if (deleteRemoteProductResult.isSuccess) {
-            print('Product con id: $p.id eliminado');
+            // print('Product con id: $p.id eliminado');
           } else {
-            print('El producto con id: $p.id no se pudo eliminar');
+            // print('El producto con id: $p.id no se pudo eliminar');
           }
         }
 
         return softDeletedProducts;
       } else {
-        print('No se pudieron obtener los productos eliminados desde API');
+        // print('No se pudieron obtener los productos eliminados desde API');
         return [];
       }
     } catch (e) {
-      print('Error en deleteProductsFromApi: $e');
+      // print('Error en deleteProductsFromApi: $e');
       return [];
     }
   }
 
+  // eliminar productos locales
   Future<List<Product>> deleteProductsFromLocal() async {
     try {
       final productsResult = await getSoftDeletedProductsUseCase();
@@ -137,18 +139,18 @@ class SyncService {
 
           if (result.isSuccess) {
             deletedProducts.add(p);
-            print('Product con id: ${p.id} eliminado');
+            // print('Product con id: ${p.id} eliminado');
           } else {
-            print('El producto con id: ${p.id} no se pudo eliminar');
+            // print('El producto con id: ${p.id} no se pudo eliminar');
           }
         }
       } else {
-        print('No se pudieron obtener los productos eliminados desde local');
+        // print('No se pudieron obtener los productos eliminados desde local');
       }
 
       return deletedProducts;
     } catch (e) {
-      print('Error en deleteProductsFromLocal: $e');
+      // print('Error en deleteProductsFromLocal: $e');
       return [];
     }
   }
