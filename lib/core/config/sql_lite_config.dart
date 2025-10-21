@@ -28,7 +28,8 @@ class SqliteConfig {
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
       data TEXT,
-      is_synced INTEGER NOT NULL DEFAULT 1
+      is_synced INTEGER NOT NULL DEFAULT 1,
+      is_deleted INTEGER NOT NULL DEFAULT 0
     )
   ''');
   }

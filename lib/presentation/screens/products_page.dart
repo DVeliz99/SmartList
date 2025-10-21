@@ -9,11 +9,17 @@ import 'package:smart_list/use_cases/product_use_cases.dart';
 class ProductsPage extends StatefulWidget {
   final GetCachedProductsUseCase getCachedProductsUseCase;
   final AddProductUseCase addProductUseCase;
+  final CheckProductExistsUseCase checkProductExistsUseCase;
+  final SoftDeleteLocalProductUseCase softDeleteLocalProductUseCase;
+  final DeleteRemoteProductUseCase deleteRemoteProductUseCase;
 
   const ProductsPage({
     super.key,
     required this.getCachedProductsUseCase,
     required this.addProductUseCase,
+    required this.checkProductExistsUseCase,
+    required this.softDeleteLocalProductUseCase,
+    required this.deleteRemoteProductUseCase,
   });
 
   @override
@@ -38,29 +44,45 @@ class _ProductsPageState extends State<ProductsPage> {
     try {
       //guarda el producto en local
       final result = await widget.addProductUseCase.call(product);
-      if(result.isSuccess && result.data != null){
+      if (result.isSuccess && result.data != null) {
         setState(() {
           //producto real al inicio de la lista
-          _products.insert(0,result.data!);
+          _products.insert(0, result.data!);
         });
-      }else{
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error al guardar producto: ${result.failure?.message ?? ''}')));
+      } else {
+        print('Error al guardar producto: ${result.failure?.message ?? ''}');
       }
-
-      
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error al guardar producto: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Error al guardar producto',
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
     }
   }
 
-  void _deleteProduct(String id) {
-    setState(() {
-      _products.removeWhere((p) => p.id == id);
-    });
+  Future<void> _deleteLocalProduct(String id) async {
+    try {
+      final deleteLocalProduct = await widget.softDeleteLocalProductUseCase
+          .call(id);
+
+      if (deleteLocalProduct.isSuccess) {
+        // Actualizar UI
+        setState(() {
+          _products.removeWhere((p) => p.id == id);
+        });
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Producto eliminado con éxito')));
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error al eliminar producto')));
+    }
   }
 
   @override
@@ -107,7 +129,7 @@ class _ProductsPageState extends State<ProductsPage> {
                     );
                   }
 
-                  // 🔹 Inicializar lista con datos locales si está vacía
+                  // Inicializar lista con datos locales si está vacía
                   if (_products.isEmpty) {
                     _products = result.data!;
                   }
@@ -121,7 +143,7 @@ class _ProductsPageState extends State<ProductsPage> {
                         child: ProductCard(
                           product: product,
                           onEdit: () {},
-                          onDelete: () => _deleteProduct(product.id),
+                          onDelete: () => _deleteLocalProduct(product.id),
                         ),
                       );
                     },

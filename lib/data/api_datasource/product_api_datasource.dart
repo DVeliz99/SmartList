@@ -26,28 +26,46 @@ class ProductApiDataSource implements ProductRemoteDataSource {
   }
 
   @override
-  Future<List<Product>> saveProducts(List<Product> products) async {
-    List<Product> savedProducts = [];
+  Future<Product> saveProduct(Product product) async {
+    final response = await http
+        .post(
+          Uri.parse(ApiConfig.baseUrl),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode(product.toJson()),
+        )
+        .timeout(Duration(milliseconds: ApiConfig.timeout));
 
-    for (var product in products) {
-      final response = await http
-          .post(
-            Uri.parse(ApiConfig.baseUrl),
-            headers: {'Content-Type': 'application/json'},
-            body: jsonEncode(product.toJson()),
-          )
-          .timeout(Duration(milliseconds: ApiConfig.timeout));
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final Map<String, dynamic> data = jsonDecode(response.body);
-        savedProducts.add(Product.fromJson(data));
-      } else {
-        throw ApiFailure(
-          'Error al guardar producto ${product.name}: ${response.statusCode}',
-        );
-      }
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final Map<String, dynamic> data = jsonDecode(response.body);
+      return product;
+    } else {
+      throw ApiFailure(
+        'Error al guardar producto ${product.name}: ${response.statusCode}',
+      );
     }
+  }
 
-    return savedProducts;
+  @override
+  Future<Product> deleteProduct(String id) async {
+    final uri = Uri.parse('${ApiConfig.baseUrl}/$id');
+
+    final response = await http
+        .delete(uri, headers: ApiConfig.headers)
+        .timeout(Duration(milliseconds: ApiConfig.timeout));
+
+    if (response.statusCode == 200 || response.statusCode == 204) {
+      // Opcional: leer mensaje de la API para debug
+      if (response.body.isNotEmpty) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        print('Mensaje API: ${data['message']}');
+      }
+
+      // se retorna el id del producto eliminado
+      return Product(id: id, name: '', data: {});
+    } else {
+      throw ApiFailure(
+        'Error al eliminar producto con id $id: ${response.statusCode}',
+      );
+    }
   }
 }

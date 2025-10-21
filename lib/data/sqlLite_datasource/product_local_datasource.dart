@@ -23,6 +23,7 @@ class ProductLocalDatasource implements ProductSqLiteDataSource {
           'name': product.name,
           'data': product.data != null ? jsonEncode(product.data) : null,
           'is_synced': 1,
+          'is_deleted': 0,
         },
         conflictAlgorithm: ConflictAlgorithm.replace, // reemplaza si ya existe
       );
@@ -40,7 +41,11 @@ class ProductLocalDatasource implements ProductSqLiteDataSource {
   Future<List<Product>> getCachedProducts() async {
     final db = await _sqliteConfig.database;
     try {
-      final List<Map<String, dynamic>> maps = await db.query('products');
+      final List<Map<String, dynamic>> maps = await db.query(
+        'products',
+        where: 'is_deleted = ?',
+        whereArgs: [0],
+      );
 
       final products = maps.map((map) {
         return Product(
@@ -56,6 +61,31 @@ class ProductLocalDatasource implements ProductSqLiteDataSource {
   }
 
   @override
+  Future<List<Product>> getSoftDeletedProducts() async {
+    final db = await _sqliteConfig.database;
+    try {
+      final List<Map<String, dynamic>> maps = await db.query(
+        'products',
+        where: 'is_deleted = ?',
+        whereArgs: [1],
+      );
+
+      final products = maps.map((map) {
+        return Product(
+          id: map['id'],
+          name: map['name'],
+          data: map['data'] != null ? jsonDecode(map['data']) : null,
+        );
+      }).toList();
+      return products;
+    } catch (error) {
+      throw DatabaseFailure(
+        'Error al obtener productos eliminados de la cache: $error',
+      );
+    }
+  }
+
+  @override
   Future<Product> addProduct(Product product) async {
     final db = await _sqliteConfig.database;
 
@@ -65,6 +95,7 @@ class ProductLocalDatasource implements ProductSqLiteDataSource {
         'name': product.name,
         'data': product.data != null ? jsonEncode(product.data) : null,
         'is_synced': 0,
+        'is_deleted': 0,
       }, conflictAlgorithm: ConflictAlgorithm.ignore);
       return product;
     } catch (e) {
@@ -93,6 +124,82 @@ class ProductLocalDatasource implements ProductSqLiteDataSource {
       return products;
     } catch (e) {
       throw DatabaseFailure('Error al obtener productos no sincronizados: $e');
+    }
+  }
+
+  @override
+  Future<bool> productExists(String id) async {
+    final db = await _sqliteConfig.database;
+
+    try {
+      final List<Map<String, dynamic>> product = await db.query(
+        'products',
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+
+      return product.isNotEmpty;
+    } catch (error) {
+      throw DatabaseFailure(
+        'Error al verificar existencia del producto: $error',
+      );
+    }
+  }
+
+  @override
+  Future<Product> softDeleteProduct(String id) async {
+    final db = await _sqliteConfig.database;
+
+    // Verifica que el producto exista
+    final resultProductExists = await productExists(id);
+    if (!resultProductExists) {
+      throw DatabaseFailure('Producto con id $id no encontrado');
+    }
+
+    try {
+      // Actualiza el campo is_deleted a 1
+      await db.update(
+        'products',
+        {'is_deleted': 1},
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+
+      // Retorna el producto actualizado
+      final List<Map<String, dynamic>> maps = await db.query(
+        'products',
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+
+      final productMap = maps.first;
+      return Product(
+        id: productMap['id'],
+        name: productMap['name'],
+        data: productMap['data'] != null
+            ? jsonDecode(productMap['data'])
+            : null,
+      );
+    } catch (error) {
+      throw DatabaseFailure('Error al eliminar producto: $error');
+    }
+  }
+
+  @override
+  Future<Product> deleteProduct(Product product) async {
+    final db = await _sqliteConfig.database;
+
+    try {
+      // Usamos batch para eliminar todos los productos en una sola transacción
+      final batch = db.batch();
+
+      batch.delete('products', where: 'id = ?', whereArgs: [product.id]);
+
+      await batch.commit(noResult: true);
+
+      return product;
+    } catch (e) {
+      throw DatabaseFailure('Error al eliminar productos: $e');
     }
   }
 }

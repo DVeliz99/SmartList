@@ -6,4 +6,8 @@ abstract class ProductSqLiteDataSource {
   Future<List<Product>> getCachedProducts();
   Future<Product> addProduct(Product product);
   Future<List<Product>> getUnsyncedProducts();
+  Future<bool> productExists(String id);
+  Future<Product> softDeleteProduct(String id);
+  Future<List<Product>> getSoftDeletedProducts();
+  Future<Product> deleteProduct(Product product);
 }
