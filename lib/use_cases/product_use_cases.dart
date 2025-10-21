@@ -39,6 +39,7 @@ class CacheProductsUseCase {
   }
 }
 
+//Caso para obtener productos en cache
 class GetCachedProductsUseCase {
   final ProductLocalRepository repository;
   GetCachedProductsUseCase({required this.repository});
@@ -54,6 +55,7 @@ class GetCachedProductsUseCase {
   }
 }
 
+//Caso para añadir productos locales
 class AddProductUseCase {
   final ProductLocalRepository repository;
 
@@ -71,6 +73,7 @@ class AddProductUseCase {
   }
 }
 
+//Caso para añadir productos remotos
 class SaveProductUseCase {
   final ProductRemoteRepository repository;
 
@@ -88,6 +91,7 @@ class SaveProductUseCase {
   }
 }
 
+//Caso para identificar productos locales
 class CheckProductExistsUseCase {
   final ProductLocalRepository repository;
 
@@ -105,6 +109,7 @@ class CheckProductExistsUseCase {
   }
 }
 
+// Caso para eleminar productos temporalmente
 class SoftDeleteLocalProductUseCase {
   final ProductLocalRepository repository;
 
@@ -122,6 +127,7 @@ class SoftDeleteLocalProductUseCase {
   }
 }
 
+// Caso para obtener productos eliminados temporalmente
 class GetSoftDeletedProductsUseCase {
   final ProductLocalRepository repository;
 
@@ -139,6 +145,7 @@ class GetSoftDeletedProductsUseCase {
   }
 }
 
+// Casos para eliminar productos remotos
 class DeleteRemoteProductUseCase {
   final ProductRemoteRepository repository;
 
@@ -156,6 +163,7 @@ class DeleteRemoteProductUseCase {
   }
 }
 
+// casos para eliminar productos locales
 class DeleteLocalProductUseCase {
   final ProductLocalRepository repository;
 
@@ -175,6 +183,7 @@ class DeleteLocalProductUseCase {
   }
 }
 
+//Caso para obtener productos locales no sincronizados
 class GetUnsyncedProductsUseCase {
   final ProductLocalRepository repository;
 
@@ -192,6 +201,7 @@ class GetUnsyncedProductsUseCase {
   }
 }
 
+//caso para actualizar producto locales
 class UpdateLocalProductUseCase {
   final ProductLocalRepository repository;
   UpdateLocalProductUseCase({required this.repository});
@@ -206,6 +216,7 @@ class UpdateLocalProductUseCase {
   }
 }
 
+// Caso para verificar si un producto remoto existe
 class RemoteProductExistsUseCase {
   final ProductRemoteRepository repository;
   RemoteProductExistsUseCase({required this.repository});
@@ -222,6 +233,7 @@ class RemoteProductExistsUseCase {
   }
 }
 
+// Caso para actualizar un producto remoto
 class UpdateRemoteProductUseCase {
   final ProductRemoteRepository repository;
   UpdateRemoteProductUseCase({required this.repository});

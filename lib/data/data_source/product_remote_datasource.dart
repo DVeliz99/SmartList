@@ -1,5 +1,6 @@
 import '../../domain/product.dart';
 
+//Recursos remotos
 abstract class ProductRemoteDataSource {
   Future<List<Product>> fetchProducts();
   Future<Product> saveProduct(Product product);

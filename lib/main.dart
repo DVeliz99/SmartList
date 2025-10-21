@@ -29,7 +29,7 @@ void main() async {
 
   final networkInfo = NetworkInfoImpl(Connectivity());
 
-  // --- Inicializar repositorios, usecases y SyncService ---
+  // Inicializar repositorios, usecases y SyncService 
   final remoteProductDataSource = ProductApiDataSource();
   final productRemoteRepository = ProductRepositoryImpl(
     dataSource: remoteProductDataSource,
@@ -95,7 +95,7 @@ void main() async {
     updateRemoteProductUseCase: updateRemoteProductUseCase,
   );
 
-  // --- Ejecutar sincronización ---
+  //Ejecutar sincronización
   await performSync(syncService, networkInfo);
 
   runApp(
@@ -110,17 +110,18 @@ void main() async {
   );
 }
 
+//Desarrollar sincronización
 Future<void> performSync(
   SyncService syncService,
   NetworkInfo networkInfo,
 ) async {
   if (await networkInfo.isConnected) {
-    print('Sincronizando productos con la API...');
+    // print('Sincronizando productos con la API...');
     await syncService.getAndSaveProducts();
     await syncService.sendProductsToApi();
     await syncService.deleteProductsFromApi();
   } else {
-    print('No hay conexión a internet. Operaciones remotas omitidas.');
+    // print('No hay conexión a internet. Operaciones remotas omitidas.');
   }
 
   // Esto se hace siempre, no necesita internet
@@ -128,6 +129,7 @@ Future<void> performSync(
 
 }
 
+//En caso de necesitar borrar la base de datos 
 void deleteDatabaseIfExists() async {
   final path = join(await getDatabasesPath(), 'my_app.db');
   await deleteDatabase(path);

@@ -60,6 +60,7 @@ class ProductLocalDatasource implements ProductSqLiteDataSource {
     }
   }
 
+  //Obtener los productos listos para eliminarse remotamente
   @override
   Future<List<Product>> getSoftDeletedProducts() async {
     final db = await _sqliteConfig.database;
@@ -85,6 +86,7 @@ class ProductLocalDatasource implements ProductSqLiteDataSource {
     }
   }
 
+  //Añadir producto al local
   @override
   Future<Product> addProduct(Product product) async {
     final db = await _sqliteConfig.database;
@@ -103,6 +105,7 @@ class ProductLocalDatasource implements ProductSqLiteDataSource {
     }
   }
 
+  //Obtener productos no sincronizados
   @override
   Future<List<Product>> getUnsyncedProducts() async {
     final db = await _sqliteConfig.database;
@@ -127,6 +130,7 @@ class ProductLocalDatasource implements ProductSqLiteDataSource {
     }
   }
 
+  //Verificar si un producto existe
   @override
   Future<bool> productExists(String id) async {
     final db = await _sqliteConfig.database;
@@ -146,6 +150,7 @@ class ProductLocalDatasource implements ProductSqLiteDataSource {
     }
   }
 
+  //Eliminar temporalmente un producto
   @override
   Future<Product> softDeleteProduct(String id) async {
     final db = await _sqliteConfig.database;
@@ -185,6 +190,7 @@ class ProductLocalDatasource implements ProductSqLiteDataSource {
     }
   }
 
+  //eliminar producto de forma permanente
   @override
   Future<Product> deleteProduct(Product product) async {
     final db = await _sqliteConfig.database;
@@ -203,6 +209,7 @@ class ProductLocalDatasource implements ProductSqLiteDataSource {
     }
   }
 
+// Actualizar producto local
   @override
   Future<Product> updateProduct(Product product) async {
     final db = await _sqliteConfig.database;
@@ -212,7 +219,7 @@ class ProductLocalDatasource implements ProductSqLiteDataSource {
         {
           'name': product.name,
           'data': jsonEncode(product.data), // se guarda como JSON
-          'is_synced': 0, 
+          'is_synced': 0,
         },
         where: 'id = ?',
         whereArgs: [product.id],

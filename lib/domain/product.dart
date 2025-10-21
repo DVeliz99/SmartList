@@ -1,3 +1,4 @@
+//Modelo Product
 class Product {
   final String id;
   String name;
@@ -5,6 +6,7 @@ class Product {
   DateTime? createdAt; //añadido opcionalmente en caso de que la api lo devuelva
   Product({required this.id, required this.name, this.data, this.createdAt});
 
+  // DE Json a Product
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
       id: json['id'].toString(),
@@ -18,6 +20,7 @@ class Product {
     );
   }
 
+  // A Mapa
   Map<String, dynamic> toMap() {
     return {
       'id': id,

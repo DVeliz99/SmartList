@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smart_list/domain/product.dart';
 
+//form reutlizable
 class ProductForm extends StatefulWidget {
   final Product product;
   final Future<void> Function(Product) onSave;

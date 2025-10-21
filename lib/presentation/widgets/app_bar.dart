@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+//Barra de la app
 class CustomShoppingAppBar extends StatelessWidget
     implements PreferredSizeWidget {
   final int productCount;
@@ -8,7 +9,6 @@ class CustomShoppingAppBar extends StatelessWidget
 
   @override
   Widget build(BuildContext context) {
-
     return Container(
       color: Theme.of(context).scaffoldBackgroundColor,
       child: Center(
@@ -21,7 +21,6 @@ class CustomShoppingAppBar extends StatelessWidget
               bottomLeft: Radius.circular(25.0),
               bottomRight: Radius.circular(25.0),
             ),
-            
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -52,7 +51,7 @@ class CustomShoppingAppBar extends StatelessWidget
                   color: Color(0xFF6A5ACD),
                   fontSize: 22,
                   fontWeight: FontWeight.w600,
-                  letterSpacing: 0.5
+                  letterSpacing: 0.5,
                 ),
               ),
             ],
