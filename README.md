@@ -34,19 +34,19 @@ La aplicación permite:
 
 Pantalla principal de la aplicación:
 
-![Pantalla principal](assets/screenshots/1.jpg)
+![Pantalla principal](lib/assets/screenshots/1.jpg)
 
 Formulario para agregar productos:
 
-![Formulario de producto](assets/screenshots/2.jpg)
+![Formulario de producto](lib/assets/screenshots/2.jpg)
 
 Formulario para editar productos y mensaje de confirmación:
 
-![Formulario de producto](assets/screenshots/3.jpg)
+![Formulario de producto](lib/assets/screenshots/3.jpg)
 
 Mensaje de error:
 
-![Lista de productos](assets/screenshots/5.jpg)
+![Lista de productos](lib/assets/screenshots/5.jpg)
 
 ## Video de ejución
 https://drive.google.com/file/d/1pWaazIQTmPTGQTu2YCD-h-wdNvWUMA8G/view?usp=drive_link
