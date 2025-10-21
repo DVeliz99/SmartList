@@ -48,7 +48,7 @@ Mensaje de error:
 
 ![Lista de productos](lib/assets/screenshots/5.jpg)
 
-## Video de ejución
+## Video de ejecución
 https://drive.google.com/file/d/1pWaazIQTmPTGQTu2YCD-h-wdNvWUMA8G/view?usp=drive_link
 
 ---
