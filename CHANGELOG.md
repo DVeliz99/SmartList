@@ -1,3 +1,9 @@
+## 0.6.0 (2025-10-21)
+
+### Feat
+
+- **sync_service.dart**: delete product (#13)
+
 ## 0.5.0 (2025-10-20)
 
 ### Feat
