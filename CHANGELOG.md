@@ -1,3 +1,9 @@
+## 0.7.1 (2025-10-21)
+
+### Refactor
+
+- **README.md-&-form.dart**: Add readme &  correct add/edit product button (#17)
+
 ## 0.7.0 (2025-10-21)
 
 ### Feat
