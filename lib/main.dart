@@ -1,6 +1,7 @@
 // Flutter & Dart packages
 import 'package:flutter/material.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:smart_list/presentation/screens/products_page.dart';
 
 // Core
@@ -18,70 +19,57 @@ import 'data/implements/product_remote_repository_implement.dart';
 // Use cases
 import 'use_cases/product_use_cases.dart';
 
-//fonts
-import 'package:google_fonts/google_fonts.dart';
-
+// Database utils
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Inicialización de conectividad y fuentes de datos
   final networkInfo = NetworkInfoImpl(Connectivity());
-
-  // Inicializar repositorios, usecases y SyncService 
   final remoteProductDataSource = ProductApiDataSource();
-  final productRemoteRepository = ProductRepositoryImpl(
-    dataSource: remoteProductDataSource,
-  );
-  final fetchProductsUseCase = FetchProductsUseCase(
-    repository: productRemoteRepository,
-  );
-
   final localProductDataSource = ProductLocalDatasource();
-  final productLocalRepository = ProductLocalRepositoryImpl(
-    dataSource: localProductDataSource,
-  );
-  final cacheProductsUseCase = CacheProductsUseCase(
-    repository: productLocalRepository,
-  );
-  final getCachedProductsUseCase = GetCachedProductsUseCase(
-    repository: productLocalRepository,
-  );
-  final addProductUseCase = AddProductUseCase(
-    repository: productLocalRepository,
-  );
-  final checkProductExistsUseCase = CheckProductExistsUseCase(
-    repository: productLocalRepository,
-  );
-  final deleteLocalProductUseCase = DeleteLocalProductUseCase(
-    repository: productLocalRepository,
-  );
-  final deleteRemoteProductUseCase = DeleteRemoteProductUseCase(
-    repository: productRemoteRepository,
-  );
-  final getSoftDeletedProductsUseCase = GetSoftDeletedProductsUseCase(
-    repository: productLocalRepository,
-  );
-  final softDeleteLocalProductUseCase = SoftDeleteLocalProductUseCase(
-    repository: productLocalRepository,
-  );
-  final saveRemoteProductUseCase = SaveProductUseCase(
-    repository: productRemoteRepository,
-  );
-  final getUnsyncedProductsUseCase = GetUnsyncedProductsUseCase(
-    repository: productLocalRepository,
-  );
-  final updateLocalProductUseCase = UpdateLocalProductUseCase(
-    repository: productLocalRepository,
-  );
-  final remoteProductExistsUseCase = RemoteProductExistsUseCase(
-    repository: productRemoteRepository,
-  );
-  final updateRemoteProductUseCase = UpdateRemoteProductUseCase(
-    repository: productRemoteRepository,
-  );
 
+  // Repositorios
+  final productRemoteRepository =
+      ProductRepositoryImpl(dataSource: remoteProductDataSource);
+  final productLocalRepository =
+      ProductLocalRepositoryImpl(dataSource: localProductDataSource);
+
+  // Casos de uso locales
+  final getCachedProductsUseCase =
+      GetCachedProductsUseCase(repository: productLocalRepository);
+  final addProductUseCase =
+      AddProductUseCase(repository: productLocalRepository);
+  final checkProductExistsUseCase =
+      CheckProductExistsUseCase(repository: productLocalRepository);
+  final softDeleteLocalProductUseCase =
+      SoftDeleteLocalProductUseCase(repository: productLocalRepository);
+  final deleteLocalProductUseCase =
+      DeleteLocalProductUseCase(repository: productLocalRepository);
+  final getUnsyncedProductsUseCase =
+      GetUnsyncedProductsUseCase(repository: productLocalRepository);
+  final getSoftDeletedProductsUseCase =
+      GetSoftDeletedProductsUseCase(repository: productLocalRepository);
+  final updateLocalProductUseCase =
+      UpdateLocalProductUseCase(repository: productLocalRepository);
+  final cacheProductsUseCase =
+      CacheProductsUseCase(repository: productLocalRepository);
+
+  // Casos de uso remotos
+  final fetchProductsUseCase =
+      FetchProductsUseCase(repository: productRemoteRepository);
+  final saveRemoteProductUseCase =
+      SaveProductUseCase(repository: productRemoteRepository);
+  final deleteRemoteProductUseCase =
+      DeleteRemoteProductUseCase(repository: productRemoteRepository);
+  final remoteProductExistsUseCase =
+      RemoteProductExistsUseCase(repository: productRemoteRepository);
+  final updateRemoteProductUseCase =
+      UpdateRemoteProductUseCase(repository: productRemoteRepository);
+
+  // Servicio de sincronización
   final syncService = SyncService(
     networkInfo: networkInfo,
     cacheProductsUseCase: cacheProductsUseCase,
@@ -95,9 +83,7 @@ void main() async {
     updateRemoteProductUseCase: updateRemoteProductUseCase,
   );
 
-  //Ejecutar sincronización
-  await performSync(syncService, networkInfo);
-
+  // Inicia la app inmediatamente (sin bloquear el UI thread)
   runApp(
     MyApp(
       getCachedProductsUseCase: getCachedProductsUseCase,
@@ -106,44 +92,29 @@ void main() async {
       softDeleteLocalProductUseCase: softDeleteLocalProductUseCase,
       deleteRemoteProductUseCase: deleteRemoteProductUseCase,
       updateLocalProductUseCase: updateLocalProductUseCase,
+      syncService: syncService,
+      networkInfo: networkInfo,
     ),
   );
 }
 
-//Desarrollar sincronización
-Future<void> performSync(
-  SyncService syncService,
-  NetworkInfo networkInfo,
-) async {
-  if (await networkInfo.isConnected) {
-    // print('Sincronizando productos con la API...');
-    await syncService.getAndSaveProducts();
-    await syncService.sendProductsToApi();
-    await syncService.deleteProductsFromApi();
-  } else {
-    // print('No hay conexión a internet. Operaciones remotas omitidas.');
-  }
-
-  // Esto se hace siempre, no necesita internet
-  await syncService.deleteProductsFromLocal();
-
-}
-
-//En caso de necesitar borrar la base de datos 
-void deleteDatabaseIfExists() async {
+/// Borra la base de datos local si es necesario (para depuración)
+Future<void> deleteDatabaseIfExists() async {
   final path = join(await getDatabasesPath(), 'my_app.db');
   await deleteDatabase(path);
-
-  //print('base de datos eliminada');
+  // print('Base de datos eliminada');
 }
 
-class MyApp extends StatelessWidget {
+/// Widget raíz de la aplicación
+class MyApp extends StatefulWidget {
   final GetCachedProductsUseCase getCachedProductsUseCase;
   final AddProductUseCase addProductUseCase;
   final CheckProductExistsUseCase checkProductExistsUseCase;
   final SoftDeleteLocalProductUseCase softDeleteLocalProductUseCase;
   final DeleteRemoteProductUseCase deleteRemoteProductUseCase;
   final UpdateLocalProductUseCase updateLocalProductUseCase;
+  final SyncService syncService;
+  final NetworkInfo networkInfo;
 
   const MyApp({
     super.key,
@@ -153,23 +124,88 @@ class MyApp extends StatelessWidget {
     required this.softDeleteLocalProductUseCase,
     required this.deleteRemoteProductUseCase,
     required this.updateLocalProductUseCase,
+    required this.syncService,
+    required this.networkInfo,
   });
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  bool _isSyncing = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _startBackgroundSync();
+  }
+
+  /// Sincroniza los productos en segundo plano (sin bloquear el main thread)
+  Future<void> _startBackgroundSync() async {
+    Future.microtask(() async {
+      try {
+        if (await widget.networkInfo.isConnected) {
+          await Future.wait([
+            widget.syncService.getAndSaveProducts(),
+            widget.syncService.sendProductsToApi(),
+            widget.syncService.deleteProductsFromApi(),
+          ]);
+        }
+        await widget.syncService.deleteProductsFromLocal();
+      } catch (e) {
+        // print('Error durante la sincronización: $e');
+      } finally {
+        if (mounted) {
+          setState(() => _isSyncing = false);
+        }
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'ProductCard',
+      title: 'Smart List',
       theme: ThemeData(
-        textTheme: GoogleFonts.robotoTextTheme(Theme.of(context).textTheme),
+        textTheme: GoogleFonts.robotoTextTheme(
+          Theme.of(context).textTheme,
+        ),
       ),
-      home: Scaffold(
-        body: ProductsPage(
-          getCachedProductsUseCase: getCachedProductsUseCase,
-          addProductUseCase: addProductUseCase,
-          checkProductExistsUseCase: checkProductExistsUseCase,
-          softDeleteLocalProductUseCase: softDeleteLocalProductUseCase,
-          deleteRemoteProductUseCase: deleteRemoteProductUseCase,
-          updateLocalProductUseCase: updateLocalProductUseCase,
+      home: _isSyncing
+          ? const SplashScreen()
+          : ProductsPage(
+              getCachedProductsUseCase: widget.getCachedProductsUseCase,
+              addProductUseCase: widget.addProductUseCase,
+              checkProductExistsUseCase: widget.checkProductExistsUseCase,
+              softDeleteLocalProductUseCase:
+                  widget.softDeleteLocalProductUseCase,
+              deleteRemoteProductUseCase: widget.deleteRemoteProductUseCase,
+              updateLocalProductUseCase: widget.updateLocalProductUseCase,
+            ),
+    );
+  }
+}
+
+/// Pantalla temporal mientras se sincroniza
+class SplashScreen extends StatelessWidget {
+  const SplashScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            CircularProgressIndicator(),
+            SizedBox(height: 20),
+            Text(
+              'Sincronizando datos...',
+              style: TextStyle(fontSize: 18),
+            ),
+          ],
         ),
       ),
     );
